@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.env
+.env.*
+!.env.example
+*.credentials.json
+service-account*.json
+.DS_Store
+
+*.tsbuildinfo
