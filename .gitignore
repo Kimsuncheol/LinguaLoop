@@ -12,3 +12,8 @@ service-account*.json
 .DS_Store
 
 *.tsbuildinfo
+
+# Local deployment settings and Firebase CLI output
+backend/deploy.env.yaml
+.firebase/
+firebase-debug*.log

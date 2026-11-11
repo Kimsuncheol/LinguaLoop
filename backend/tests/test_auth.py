@@ -53,3 +53,16 @@ def test_successful_callback_keeps_tokens_out_of_session(monkeypatch):
     with api.session_transaction() as session:
         assert "private-token" not in str(dict(session))
     assert api.get("/api/auth/kakao/callback?code=valid&state=valid-state").status_code == 400
+
+
+def test_firebase_hosting_session_cookie(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("KAKAO_REST_API_KEY", "test-key")
+    monkeypatch.setenv("KAKAO_REDIRECT_URI", "https://example.web.app/api/auth/kakao/callback")
+    api = create_app({"TESTING": True, "SECRET_KEY": "test-only"}).test_client()
+    response = api.get("/api/auth/kakao/login")
+    assert response.status_code == 302
+    cookie = response.headers["Set-Cookie"]
+    assert cookie.startswith("__session=")
+    assert "Secure" in cookie and "HttpOnly" in cookie and "SameSite=Lax" in cookie
+    assert response.headers["Cache-Control"] == "no-store"

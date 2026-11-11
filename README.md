@@ -68,7 +68,9 @@ PWA caching applies to the static app shell in production builds. API responses 
 
 ## Production
 
-Build `frontend/dist`, serve it with SPA fallback, and forward `/api/*` to Gunicorn (`cd backend && .venv/bin/gunicorn 'app:create_app()'`). Keep both behind one HTTPS origin. Set `APP_ENV=production`, a strong `SECRET_KEY`, the public `FRONTEND_URL`, and the matching Kakao callback URI. Never use Flask debug mode in production. Disable reverse-proxy caching for `/api`, and preserve its paths. See [architecture](docs/architecture.md) and [agent instructions](AGENTS.md).
+Deploy to **Firebase Hosting**, with `/api` rewritten to the Flask container on **Cloud Run** (`lingualoop-api`, `asia-east1`). Both use the same public HTTPS origin. Firebase Hosting forwards the `__session` cookie used by Flask.
+
+See [Firebase deployment](docs/deployment.md) for project setup, secrets, deployment order, and verification. The Firebase project is `lingualoop-kr-2026` (LinguaLoop), recorded in `.firebaserc`. The intended public origin is `https://lingualoop-kr-2026.web.app`.
 
 ## References
 

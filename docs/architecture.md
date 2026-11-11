@@ -1,10 +1,10 @@
 # Architecture
 
-The browser calls Flask over `/api` on the same origin. Vite supplies the proxy in development; the deployment reverse proxy supplies it in production. Flask owns identity, authorization, Firestore access, and third-party API calls.
+The browser calls Flask over `/api` on the same origin. Vite supplies the proxy in development; Firebase Hosting rewrites `/api` to the Cloud Run Flask service in production. Flask owns identity, authorization, Firestore access, and third-party API calls.
 
 ## Authentication
 
-`GET /api/auth/kakao/login` generates a cryptographic state value and redirects to Kakao. `GET /api/auth/kakao/callback` validates the one-time state and its ten-minute lifetime, exchanges the code, retrieves a profile, and upserts `users/kakao:{id}` in Firestore. The cookie stores a minimal signed user profile; it is signed, not encrypted. Provider access tokens are used only for the profile request and are not persisted.
+`GET /api/auth/kakao/login` generates a cryptographic state value and redirects to Kakao. `GET /api/auth/kakao/callback` validates the one-time state and its ten-minute lifetime, exchanges the code, retrieves a profile, and upserts `users/kakao:{id}` in Firestore. The `__session` cookie (required by Firebase Hosting) stores a minimal signed user profile; it is signed, not encrypted. Provider access tokens are used only for the profile request and are not persisted.
 
 `GET /api/auth/me` returns the session profile or 401. `POST /api/auth/logout` clears the local session and requires the `X-Requested-With: LinguaLoop` header. Same-origin policy, no CORS grants, and the custom header protect mutations against browser CSRF. Logout does not unlink the Kakao account or invalidate other devices' cookies. Signed cookies expire after eight hours; centralized session revocation would require server-side sessions.
 

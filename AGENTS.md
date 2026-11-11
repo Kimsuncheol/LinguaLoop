@@ -6,6 +6,9 @@
 - Identity: Kakao Login OAuth authorization-code flow handled by Flask.
 - Database: Firebase Cloud Firestore through the backend Admin SDK.
 - External content: Notion API and Google Drive API through backend service modules.
+- Deployment: Firebase Hosting serves frontend/dist; /api routes to Flask on Cloud Run (lingualoop-api, asia-east1).
+- Keep Flask's cookie name __session: Firebase Hosting strips other incoming cookies.
+- Deploy Cloud Run before Hosting. Never deploy to an inferred or unrelated Firebase project.
 - Preserve this stack unless the user explicitly requests a change.
 
 ## Layout

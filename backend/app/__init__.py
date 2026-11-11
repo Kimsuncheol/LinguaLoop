@@ -11,6 +11,8 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY=os.getenv("SECRET_KEY"),
         FRONTEND_URL=os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        # Firebase Hosting forwards only this cookie to Cloud Run.
+        SESSION_COOKIE_NAME="__session",
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=os.getenv("APP_ENV") != "development",
