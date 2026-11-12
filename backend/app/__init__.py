@@ -10,6 +10,8 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_mapping(
         SECRET_KEY=os.getenv("SECRET_KEY"),
+        SCRAPER_API_URL=os.getenv("SCRAPER_API_URL", ""),
+        SCRAPER_API_TOKEN=os.getenv("SCRAPER_API_TOKEN", ""),
         FRONTEND_URL=os.getenv("FRONTEND_URL", "http://localhost:5173"),
         # Firebase Hosting forwards only this cookie to Cloud Run.
         SESSION_COOKIE_NAME="__session",
@@ -43,6 +45,8 @@ def create_app(test_config=None):
 
     from .routes.auth import auth
     from .routes.health import health
+    from .routes.lessons import lessons
+    app.register_blueprint(lessons, url_prefix="/api")
     app.register_blueprint(auth, url_prefix="/api/auth")
     app.register_blueprint(health, url_prefix="/api")
     return app

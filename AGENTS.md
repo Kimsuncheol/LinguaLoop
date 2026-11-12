@@ -19,6 +19,7 @@
 - `firebase/`: database rules. `docs/`: architecture and integration notes.
 
 ## Development
+- Show a skeleton UI matching the view layout while loading on every view, including session initialization and lesson details. Keep existing content visible during background refresh or pagination, expose an accessible loading status, and respect reduced-motion preferences.
 - Read README.md and applicable nested AGENTS.md before changing code.
 - Use npm and preserve frontend/package-lock.json. Node >=22.12 is required.
 - Use backend/.venv and backend/requirements.txt; never install Python dependencies globally.
@@ -44,3 +45,8 @@
 - Do not invent learning-domain schemas or expose shared integration resources without requirements.
 - Test auth and authorization behavior when changing it. Keep tests offline.
 - Report checks run, configuration still needed, and any unverified provider behavior.
+
+## GitHub auto-commit
+- After completing a requested change and passing the applicable checks, automatically commit the task's changes with a clear, descriptive message and push the commit to the current branch's configured GitHub remote.
+- Review the diff before committing, stage only files changed for the current task, and leave unrelated user changes untouched. Never commit secrets or generated artifacts that should be ignored.
+- Do not force-push or push directly to a protected branch. If the remote, branch, authentication, or checks prevent committing or pushing, report the blocker and preserve the local changes.

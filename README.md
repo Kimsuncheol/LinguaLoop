@@ -79,3 +79,22 @@ See [Firebase deployment](docs/deployment.md) for project setup, secrets, deploy
 - [Google Drive Python setup](https://developers.google.com/workspace/drive/api/quickstart/python)
 - [Notion API versioning](https://developers.notion.com/reference/versioning)
 - [Vite PWA guide](https://vite-pwa-org.netlify.app/guide/)
+
+## Lesson cards
+
+Set `SCRAPER_API_URL` in the Flask environment to the trusted base origin of the
+English scraper (for example `http://127.0.0.1:8000` locally, HTTPS in production).
+Optionally set `SCRAPER_API_TOKEN` if the upstream accepts a Bearer token. These
+settings stay server-side. The user must sign in with Kakao before `/api/lessons`
+can read the shared lesson collection. No scraper mutations are exposed.
+
+The library opens a lesson's dialogue, explanation and vocabulary. Practice
+reveals Korean meanings and moves through expressions on the loaded page; it
+does not persist scores or progress. Missing fields remain unavailable, with
+links to the original Chosun lesson image and article. All initial and paginated
+loads use skeletons; provider failures have a retry action.
+
+The scraper's `/api/v1/articles` summaries omit expressions, so the adapter uses
+at most six concurrent detail requests per page. A future upstream summary
+endpoint can replace that bounded fan-out. Live provider configuration and
+production access control for the scraper must be verified before deployment.

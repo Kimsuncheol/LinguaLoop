@@ -1,35 +1,73 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { currentUser, logout, type User } from './services/api'
-const user = ref<User | null>(null)
-const loading = ref(true)
-const error = ref('')
-onMounted(async () => {
-  try { user.value = await currentUser() }
-  catch (cause) { error.value = (cause as Error).message }
-  finally { loading.value = false }
-})
+import { onMounted, ref } from "vue";
+import { currentUser, logout, type User } from "./services/api";
+import LessonLibrary from "./components/LessonLibrary.vue";
+import LoadingSkeleton from "./components/LoadingSkeleton.vue";
+const user = ref<User | null>(null),
+  loading = ref(true),
+  signingOut = ref(false),
+  error = ref("");
+async function session() {
+  loading.value = true;
+  error.value = "";
+  try {
+    user.value = await currentUser();
+  } catch (cause) {
+    error.value = (cause as Error).message;
+  } finally {
+    loading.value = false;
+  }
+}
+onMounted(session);
 async function signOut() {
-  try { await logout(); user.value = null }
-  catch (cause) { error.value = (cause as Error).message }
+  signingOut.value = true;
+  error.value = "";
+  try {
+    await logout();
+    user.value = null;
+  } catch (cause) {
+    error.value = (cause as Error).message;
+  } finally {
+    signingOut.value = false;
+  }
 }
 </script>
-
 <template>
   <main>
-    <p class="eyebrow">LinguaLoop</p>
-    <h1>Keep your language<br>learning in motion.</h1>
-    <p>One home for your learning, notes, and resources.</p>
-    <p v-if="loading" role="status">Loading your session…</p>
-    <section v-else-if="user">
-      <h2>Welcome, {{ user.name }}</h2>
-      <button @click="signOut">Sign out</button>
-    </section>
-    <a v-else class="kakao" href="/api/auth/kakao/login">Continue with KakaoTalk</a>
-    <p v-if="error" role="alert">{{ error }}</p>
-    <div class="resources">
-      <article><h2>Notion</h2><p>Integration foundation for your learning notes.</p></article>
-      <article><h2>Google Drive</h2><p>Integration foundation for your learning files.</p></article>
+    <header class="app-header">
+      <a class="brand" href="/">lingualoop<span class="brand-dot">●</span></a>
+      <div v-if="user" class="account">
+        <span>{{ user.name }}</span
+        ><button class="text-button" :disabled="signingOut" @click="signOut">
+          {{ signingOut ? "Signing out…" : "Sign out" }}
+        </button>
+      </div>
+    </header>
+    <LoadingSkeleton v-if="loading" label="Loading your session" />
+    <div v-else-if="error" role="alert" class="error">
+      <p>{{ error }}</p>
+      <button class="secondary" @click="session">Try again</button>
     </div>
+    <LessonLibrary v-else-if="user" />
+    <section v-else class="welcome view">
+      <p class="eyebrow">MAKE A LITTLE ROOM FOR ENGLISH</p>
+      <h1>Keep your language<br />learning in motion.</h1>
+      <p class="intro">
+        Everyday expressions, Korean meanings, and conversations that make them
+        stick.
+      </p>
+      <a class="kakao" href="/api/auth/kakao/login"
+        >Continue with KakaoTalk →</a
+      >
+      <p class="muted">A little English, every day.</p>
+      <div class="welcome-preview" aria-hidden="true">
+        <span class="eyebrow">READ · RECALL · REPEAT</span>
+        <h2>Your next expression<br />is waiting.</h2>
+        <span>Learn it in context. Make it your own.</span>
+      </div>
+    </section>
+    <footer class="app-footer">
+      LinguaLoop <span>Keep learning in motion.</span>
+    </footer>
   </main>
 </template>
