@@ -47,6 +47,11 @@
 - Test auth and authorization behavior when changing it. Keep tests offline.
 - Report checks run, configuration still needed, and any unverified provider behavior.
 
+## Automatic redeployment
+- After completing any requested project changes and passing the applicable checks, automatically redeploy without asking for confirmation unless the user explicitly asks not to deploy.
+- Follow docs/deployment.md and use the explicitly configured Firebase project, lingualoop-kr-2026. Deploy Cloud Run (lingualoop-api, asia-east1) before Firebase Hosting, preserve existing runtime configuration and secrets, and verify the public site and API health after deployment.
+- If authentication, permissions, configuration, or deployment errors prevent redeployment, report the blocker and preserve the completed changes. Never claim deployment succeeded without verification.
+
 ## GitHub auto-commit
 - After completing a requested change and passing the applicable checks, automatically commit the task's changes with a clear, descriptive message and push the commit to the current branch's configured GitHub remote.
 - Review the diff before committing, stage only files changed for the current task, and leave unrelated user changes untouched. Never commit secrets or generated artifacts that should be ignored.
