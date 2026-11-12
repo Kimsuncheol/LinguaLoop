@@ -19,6 +19,7 @@
 - `firebase/`: database rules. `docs/`: architecture and integration notes.
 
 ## Development
+- Apply the project-wide Light, Dark, and System appearance modes to all views, components, loading skeletons, and error states. Use the shared semantic color variables in frontend/src/style.css, preserve readable contrast, and honor the persisted choice and live system preference. Initialize appearance before first paint; keep the selector available to signed-in and signed-out users.
 - Show a skeleton UI matching the view layout while loading on every view, including session initialization and lesson details. Keep existing content visible during background refresh or pagination, expose an accessible loading status, and respect reduced-motion preferences.
 - Read README.md and applicable nested AGENTS.md before changing code.
 - Use npm and preserve frontend/package-lock.json. Node >=22.12 is required.

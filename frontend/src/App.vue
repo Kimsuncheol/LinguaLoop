@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { appearance, setAppearance } from "./services/appearance";
 import { onMounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
@@ -36,11 +37,21 @@ async function signOut() {
   <main>
     <header class="app-header">
       <a class="brand" href="/">lingualoop<span class="brand-dot">●</span></a>
-      <div v-if="user" class="account">
-        <span>{{ user.name }}</span
-        ><button class="text-button" :disabled="signingOut" @click="signOut">
-          {{ signingOut ? "Signing out…" : "Sign out" }}
-        </button>
+      <div class="header-actions">
+        <label class="appearance-control">
+          <span>Appearance</span>
+          <select :value="appearance" @change="setAppearance(($event.target as HTMLSelectElement).value)">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <div v-if="user" class="account">
+          <span>{{ user.name }}</span
+          ><button class="text-button" :disabled="signingOut" @click="signOut">
+            {{ signingOut ? "Signing out…" : "Sign out" }}
+          </button>
+        </div>
       </div>
     </header>
     <LoadingSkeleton v-if="loading" label="Loading your session" />

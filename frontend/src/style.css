@@ -1,12 +1,31 @@
 :root {
+  color-scheme: light;
+  --text: #16392e;
+  --page: #f7f8f5;
+  --surface: #ffffff;
+  --surface-soft: #edf2eb;
+  --accent: #245c4b;
+  --button-bg: #245c4b;
+  --focus: #598238;
+  --border: #d4dfd6;
+  --brand-dot: #79a65c;
+  --muted: #65766c;
+  --feature-bg: #16392e;
+  --on-feature: #ffffff;
+  --shadow: #16392e0c;
+  --error-bg: #fff0d1;
+  --error-text: #78511f;
+  --skeleton-base: #e2e9df;
+  --skeleton-highlight: #f0f4ed;
+
   font-family:
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #16392e;
-  background: #f7f8f5;
+  color: var(--text);
+  background: var(--page);
   font-synthesis: none;
 }
 * {
@@ -32,11 +51,11 @@ a {
   touch-action: manipulation;
 }
 a {
-  color: #245c4b;
+  color: var(--accent);
 }
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #598238;
+  outline: 3px solid var(--focus);
   outline-offset: 5px;
 }
 main {
@@ -49,7 +68,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #d4dfd6;
+  border-bottom: 1px solid var(--border);
   gap: 20px;
 }
 .brand {
@@ -57,10 +76,10 @@ main {
   letter-spacing: -1.2px;
   font-weight: 800;
   text-decoration: none;
-  color: #16392e;
+  color: var(--text);
 }
 .brand-dot {
-  color: #79a65c;
+  color: var(--brand-dot);
   font-size: 13px;
   margin-left: 4px;
 }
@@ -91,7 +110,7 @@ h2 {
   line-height: 1.6;
 }
 .muted {
-  color: #65766c;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -99,7 +118,7 @@ h2 {
   font-size: 19px;
   max-width: 540px;
   line-height: 1.7;
-  color: #65766c;
+  color: var(--muted);
 }
 .section-heading {
   display: flex;
@@ -122,12 +141,12 @@ h2 {
   min-height: 48px;
 }
 .primary {
-  background: #245c4b;
-  color: white;
+  background: var(--button-bg);
+  color: var(--on-feature);
 }
 .secondary {
-  background: #e9efe6;
-  color: #16392e;
+  background: var(--surface-soft);
+  color: var(--text);
 }
 .kakao {
   background: #fee500;
@@ -137,7 +156,7 @@ h2 {
 .text-button {
   background: transparent;
   border: 0;
-  color: #245c4b;
+  color: var(--accent);
   padding: 10px 0;
   font-size: 13px;
 }
@@ -149,9 +168,9 @@ h2 {
 }
 .lesson-card {
   text-align: left;
-  color: #16392e;
-  background: #fff;
-  border: 1px solid #d4dfd6;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 28px;
   display: flex;
@@ -165,11 +184,11 @@ h2 {
 }
 .lesson-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px #16392e0c;
+  box-shadow: 0 12px 32px var(--shadow);
 }
 .lesson-card .eyebrow {
   font-size: 10px;
-  color: #65766c;
+  color: var(--muted);
 }
 .lesson-card h2 {
   font-size: 28px;
@@ -178,7 +197,7 @@ h2 {
 .lesson-card p {
   margin: 0 0 24px;
   line-height: 1.6;
-  color: #65766c;
+  color: var(--muted);
 }
 .card-action {
   font-size: 12px;
@@ -186,9 +205,9 @@ h2 {
   margin-top: auto;
 }
 .featured {
-  background: #16392e;
-  color: #fff;
-  border-color: #16392e;
+  background: var(--feature-bg);
+  color: var(--on-feature);
+  border-color: var(--feature-bg);
 }
 .featured .eyebrow,
 .featured p {
@@ -211,7 +230,7 @@ h2 {
   overflow-wrap: anywhere;
 }
 .meaning {
-  color: #245c4b;
+  color: var(--accent);
   font-size: 23px;
   line-height: 1.6;
 }
@@ -223,18 +242,18 @@ h2 {
 }
 .tabs button {
   border: 0;
-  background: #edf2eb;
+  background: var(--surface-soft);
   border-radius: 30px;
-  color: #65766c;
+  color: var(--muted);
   padding: 12px 20px;
   font-size: 13px;
 }
 .tabs .active {
-  background: #16392e;
-  color: #fff;
+  background: var(--feature-bg);
+  color: var(--on-feature);
 }
 .conversation {
-  background: #edf2eb;
+  background: var(--surface-soft);
   padding: 28px;
   border-radius: 20px;
   line-height: 1.7;
@@ -246,8 +265,8 @@ h2 {
 }
 .translation {
   font-size: 16px;
-  color: #65766c;
-  border-top: 1px solid #d4dfd6;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
   padding-top: 20px;
 }
 .source-links {
@@ -256,15 +275,15 @@ h2 {
   gap: 20px;
   margin: 32px 0;
   padding-top: 24px;
-  border-top: 1px solid #d4dfd6;
+  border-top: 1px solid var(--border);
 }
 .source-links a {
   font-size: 13px;
   text-underline-offset: 4px;
 }
 .focus-card {
-  background: #16392e;
-  color: white;
+  background: var(--feature-bg);
+  color: var(--on-feature);
   min-height: 370px;
   padding: 36px;
   border-radius: 24px;
@@ -286,14 +305,14 @@ h2 {
 progress {
   width: 100%;
   height: 5px;
-  accent-color: #245c4b;
+  accent-color: var(--accent);
 }
 .hint {
-  background: #edf2eb;
+  background: var(--surface-soft);
   padding: 22px;
   border-radius: 16px;
   line-height: 1.7;
-  color: #65766c;
+  color: var(--muted);
   font-size: 14px;
 }
 .reveal {
@@ -303,21 +322,21 @@ progress {
 .empty,
 .error {
   padding: 32px;
-  background: #edf2eb;
+  background: var(--surface-soft);
   border-radius: 20px;
   margin: 32px 0;
   line-height: 1.7;
 }
 .error {
-  background: #fff0d1;
-  color: #78511f;
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 .app-footer {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #d4dfd6;
+  border-top: 1px solid var(--border);
   padding: 28px 0;
-  color: #65766c;
+  color: var(--muted);
   font-size: 12px;
 }
 .welcome {
@@ -325,8 +344,8 @@ progress {
 }
 .welcome-preview {
   padding: 32px;
-  background: #16392e;
-  color: white;
+  background: var(--feature-bg);
+  color: var(--on-feature);
   border-radius: 24px;
   max-width: 400px;
   margin: 48px 0 0;
@@ -342,7 +361,7 @@ progress {
   padding: 48px 0;
 }
 .skeleton {
-  background: linear-gradient(100deg, #e2e9df 20%, #f0f4ed 40%, #e2e9df 60%);
+  background: linear-gradient(100deg, var(--skeleton-base) 20%, var(--skeleton-highlight) 40%, var(--skeleton-base) 60%);
   background-size: 200% 100%;
   animation: shimmer 1.6s ease infinite;
   border-radius: 6px;
@@ -359,7 +378,7 @@ progress {
   height: 18px;
 }
 .skeleton-card {
-  border: 1px solid #d4dfd6;
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 28px;
   min-height: 265px;
@@ -462,4 +481,57 @@ progress {
   .lesson-card:hover {
     transform: none;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --text: #e3eee7;
+  --page: #101b17;
+  --surface: #192a22;
+  --surface-soft: #22372c;
+  --accent: #a9d5b6;
+  --button-bg: #32664f;
+  --focus: #bbdf8d;
+  --border: #3b5143;
+  --brand-dot: #a5cc83;
+  --muted: #adbdaf;
+  --feature-bg: #244634;
+  --shadow: #00000033;
+  --error-bg: #47371c;
+  --error-text: #ffe0a4;
+  --skeleton-base: #263c30;
+  --skeleton-highlight: #36503f;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.appearance-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.appearance-control select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 44px;
+  padding: 8px;
+  cursor: pointer;
+}
+select:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .app-header { flex-wrap: wrap; padding: 18px 0; gap: 12px; }
+  .header-actions { gap: 12px; }
+  .appearance-control > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }
