@@ -75,6 +75,10 @@ test("meaning paragraphs and the real vue-bubble-chat renderer show A left and B
   expect(b.x + b.width).toBeLessThan(bCircle.x);
   expect(bCircle.x + bCircle.width).toBeCloseTo(bRow.x + bRow.width, 0);
   await expect(rows.locator(":scope > div .name")).toHaveCount(0);
+  await expect(rows.nth(0).locator(":scope > div")).toHaveCSS("border-top-left-radius", "4px");
+  await expect(rows.nth(0).locator(":scope > div")).toHaveCSS("border-bottom-left-radius", "16px");
+  await expect(rows.nth(1).locator(":scope > div")).toHaveCSS("border-top-right-radius", "4px");
+  await expect(rows.nth(1).locator(":scope > div")).toHaveCSS("border-bottom-right-radius", "16px");
   expect(b.x).toBeGreaterThan(a.x);
   await expect(rows.nth(0).locator(".bubble-translation")).toHaveText(
     "안녕하세요.",

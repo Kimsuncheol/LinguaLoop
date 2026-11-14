@@ -78,6 +78,36 @@ const practice = (page: Page) =>
   ).toBeVisible();
 
 // All data and authentication are fixture responses; tests never contact providers.
+test("dashboard bottom-right button returns to top and stays out of lesson views", async ({ page }) => {
+  await fixture(page);
+  await page.goto("/");
+  await dashboard(page);
+  const button = page.getByRole("button", { name: "Back to top", exact: true });
+  await expect(button).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  const bounds = (await button.boundingBox())!;
+  expect(bounds.x + bounds.width).toBeGreaterThan(350);
+  expect(bounds.y + bounds.height).toBeGreaterThan(800);
+  await button.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.route("**/app-release.json", route => route.fulfill({ json: {
+    id: "2100-01-01T00:00:00.000Z", message: "A new update is available",
+  } }));
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  const snackbar = page.getByRole("complementary", { name: "LinguaLoop update" });
+  await expect(snackbar).toBeVisible();
+  await expect.poll(async () => {
+    const arrow = (await button.boundingBox())!;
+    const notice = (await snackbar.boundingBox())!;
+    return arrow.y + arrow.height <= notice.y;
+  }).toBe(true);
+  await page.getByRole("button", { name: "Dismiss update notification" }).click();
+  await page.locator(".lesson-card").first().click();
+  await detail(page);
+  await expect(button).toHaveCount(0);
+});
+
 test("dashboard scroll loads both languages and pauses on pagination errors", async ({ page }) => {
   await fixture(page);
   const requests: string[] = [];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type Release = { id: string; message: string };
 const current = __APP_RELEASE__;
@@ -7,6 +7,19 @@ const release = ref<Release>(current);
 const dismissed = ref("");
 const refreshing = ref(false);
 const error = ref("");
+const snackbar = ref<HTMLElement | null>(null);
+watch(snackbar, (element, _previous, cleanup) => {
+  const updateClearance = () => document.documentElement.style.setProperty(
+    "--release-clearance", `${element ? element.getBoundingClientRect().height + 16 : 0}px`,
+  );
+  updateClearance();
+  const observer = new ResizeObserver(updateClearance);
+  if (element) observer.observe(element);
+  cleanup(() => {
+    observer.disconnect();
+    document.documentElement.style.removeProperty("--release-clearance");
+  });
+}, { flush: "post" });
 const storageKey = "lingualoop-dismissed-release";
 const visible = computed(() => {
   const lastDismissed = Date.parse(dismissed.value);
@@ -111,7 +124,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <aside v-if="visible" class="release-snackbar" aria-label="LinguaLoop update">
+  <aside v-if="visible" ref="snackbar" class="release-snackbar" aria-label="LinguaLoop update">
     <div role="status" aria-live="polite" aria-atomic="true">
       <strong>{{ updateAvailable ? "Update recommended" : "LinguaLoop has been updated" }}</strong>
       <p>{{ release.message }}</p>

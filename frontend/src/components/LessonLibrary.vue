@@ -14,6 +14,7 @@ import ExitConfirmation from "./ExitConfirmation.vue";
 import LoadingSkeleton from "./LoadingSkeleton.vue";
 import LessonReader from "./LessonReader.vue";
 import LessonPractice from "./LessonPractice.vue";
+import BackToTop from "./BackToTop.vue";
 const language = ref<Language>("en");
 const cache = reactive<
   Record<Language, { items: Lesson[]; next: number | null; loaded: boolean }>
@@ -188,6 +189,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
+  <BackToTop v-if="view.kind === 'dashboard'" />
   <ExitConfirmation
     :open="exitRequested"
     :ready="exitReady"
