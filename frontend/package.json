@@ -7,11 +7,15 @@
     "dev": "NODE_OPTIONS=\"--require ./node-compat.cjs\" vite",
     "build": "vue-tsc -b && NODE_OPTIONS=\"--require ./node-compat.cjs\" vite build",
     "preview": "NODE_OPTIONS=\"--require ./node-compat.cjs\" vite preview",
-    "test:navigation": "playwright test",
-    "test:vocabulary": "node --experimental-strip-types --test tests/vocabulary.test.ts"
+    "test:navigation": "playwright test navigation.spec.ts",
+    "test:vocabulary": "node --experimental-strip-types --test tests/vocabulary.test.ts",
+    "test:lesson-text": "node --experimental-strip-types --test tests/lessonText.test.ts",
+    "test:lesson-ui": "playwright test lesson-formatting.spec.ts"
   },
   "dependencies": {
-    "vue": "^3.5.0"
+    "@vue/compat": "3.5.45",
+    "vue": "^3.5.0",
+    "vue-bubble-chat": "1.1.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",

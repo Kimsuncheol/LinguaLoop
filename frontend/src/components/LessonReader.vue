@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import LessonMeaning from "./LessonMeaning.vue";
+import LessonDialogue from "./LessonDialogue.vue";
 import { vocabularyItems } from "../services/vocabulary";
 import type { Lesson } from "../services/lessons";
 const props = defineProps<{ lesson: Lesson }>();
@@ -144,9 +146,10 @@ function navigate(event: KeyboardEvent) {
             {{ expression.reading }}
           </p>
           <p v-if="expression.meaning" lang="ko">{{ expression.meaning }}</p>
-          <p v-if="expression.explanation" class="lesson-copy" lang="ko">
-            {{ expression.explanation }}
-          </p>
+          <LessonMeaning
+            v-if="expression.explanation"
+            :text="expression.explanation"
+          />
         </section>
         <p v-if="!lesson.expressions.length">
           Expressions are unavailable for this lesson.
@@ -226,21 +229,18 @@ function navigate(event: KeyboardEvent) {
           Vocabulary is unavailable for this lesson.
         </p>
       </template>
-      <template v-else>
-        <p class="lesson-copy" :lang="section === 'Meaning' ? 'ko' : 'en'">
-          {{
-            (section === "Dialogue" ? lesson.dialogue : lesson.explanation) ||
-            "This section is unavailable. Compare the original lesson below."
-          }}
-        </p>
-        <p
-          v-if="section === 'Dialogue' && lesson.translation"
-          class="translation lesson-copy"
-          lang="ko"
-        >
-          {{ lesson.translation }}
+      <template v-else-if="section === 'Meaning'">
+        <LessonMeaning v-if="lesson.explanation" :text="lesson.explanation" />
+        <p v-else>
+          This section is unavailable. Compare the original lesson below.
         </p>
       </template>
+      <LessonDialogue
+        v-else-if="section === 'Dialogue'"
+        :dialogue="lesson.dialogue"
+        :translation="lesson.translation"
+        :language="lesson.language"
+      />
     </section>
     <button
       v-if="lesson.expressions.length"

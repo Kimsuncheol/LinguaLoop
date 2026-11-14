@@ -173,3 +173,24 @@ Run the offline browser navigation checks with `cd frontend && npm run test:navi
 Install the test browser once with `npx playwright install chromium`. All login
 and lesson API responses in this suite are fixtures; no provider credentials
 are used.
+
+## Meaning and dialogue presentation
+
+Meaning explanations are separated into readable paragraphs without rewriting
+source wording. Dialogue recognizes explicit A/B labels: character A is left,
+character B is right. Korean translation is grouped with a turn only when both
+the number of turns and character sequence match; otherwise it remains below
+the conversation. Unlabelled or unsupported character formats retain the
+original text rather than inventing speakers.
+
+The dialogue uses the requested [`vue-bubble-chat`](https://github.com/vadymsem/vue-bubble-chat)
+1.1.2 package, which ships a Vue 2 renderer. A lazy, isolated Vue 3 `@vue/compat`
+3.5.45 mount supports it; the main app keeps standard Vue 3 without a global
+compatibility alias. Keep the compat version aligned with the locked Vue version.
+The adapter disables the floating launcher, composer, auto-scroll and vendor
+style injection; semantic app styles provide a read-only, themed lesson thread.
+No chat messages are sent or stored.
+
+Checks: `npm run test:lesson-text` covers paragraph/character parsing and
+`npm run test:lesson-ui` covers the actual package renderer, alignment, themes,
+translation grouping, safe text rendering and cleanup. All API data is mocked.

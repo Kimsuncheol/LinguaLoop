@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 const deployed = process.env.TEST_BASE_URL;
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "navigation.spec.ts",
+  testMatch: "*.spec.ts",
   fullyParallel: true,
   use: {
     baseURL: deployed || "http://127.0.0.1:5187",
