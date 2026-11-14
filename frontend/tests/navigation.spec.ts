@@ -78,6 +78,31 @@ const practice = (page: Page) =>
   ).toBeVisible();
 
 // All data and authentication are fixture responses; tests never contact providers.
+test("focused navigation headings have no frame in light and dark themes", async ({ page }) => {
+  await fixture(page);
+  await page.goto("/");
+  await dashboard(page);
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    await page.locator(".lesson-card").first().click();
+    await detail(page);
+    await expect(page.locator(".reader-content > h1")).toBeFocused();
+    await expect(page.locator(".reader-content > h1")).toHaveCSS("outline-style", "none");
+    await page.getByRole("button", { name: "Practice this lesson →", exact: true }).click();
+    await practice(page);
+    await expect(page.locator(".practice h1")).toBeFocused();
+    await expect(page.locator(".practice h1")).toHaveCSS("outline-style", "none");
+    await page.goBack();
+    await detail(page);
+    await page.goBack();
+    await dashboard(page);
+    await expect(page.locator(".view h1")).toBeFocused();
+    await expect(page.locator(".view h1")).toHaveCSS("outline-style", "none");
+    await page.keyboard.press("Tab");
+    await expect(page.locator(":focus")).toHaveCSS("outline-style", "solid");
+  }
+});
+
 test("Back and Forward restore nested lessons, practice position and dashboard", async ({
   page,
 }) => {
