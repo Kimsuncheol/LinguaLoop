@@ -626,3 +626,22 @@ progress {
 @media (max-width: 600px) {
   .app-header { flex-wrap: wrap; padding: 18px 0; gap: 12px; }
 }
+
+.language-switch { display: flex; gap: 8px; flex-wrap: wrap; }
+.language-switch .chosen { background: var(--feature-bg); color: var(--on-feature); }
+.library-eyebrow { margin-top: 36px; }
+.reader-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; margin-top: 36px; align-items: start; }
+.lesson-sidebar { background: var(--surface-soft); padding: 20px; border-radius: 20px; max-height: 75vh; overflow: auto; position: sticky; top: 24px; }
+.sidebar-lesson { display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 16px; margin-top: 10px; text-align: left; background: transparent; color: var(--text); border: 1px solid transparent; border-radius: 12px; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+.sidebar-lesson[aria-current="true"] { background: var(--surface); border-color: var(--border); }
+.sidebar-lesson span { color: var(--muted); font-size: 12px; }
+.reader-content { min-width: 0; }
+.reader-content h1 { font-size: clamp(2rem, 4vw, 3.2rem); overflow-wrap: anywhere; }
+.reading { color: var(--muted); font-size: 15px; line-height: 1.7; overflow-wrap: anywhere; }
+.reader-practice { margin-top: 24px; }
+.expression-block + .expression-block { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px; }
+.expression-block h2 { font-size: 24px; overflow-wrap: anywhere; }
+.example-block { padding: 8px 0; }
+.reader-skeleton-body { height: 340px; width: 100%; margin-top: 32px; border-radius: 20px; }
+.detail-skeleton .skeleton-heading { margin-top: 28px; width: 90%; }
+@media (max-width: 800px) { .reader-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; } .lesson-sidebar { display: none; } }

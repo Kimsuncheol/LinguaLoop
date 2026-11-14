@@ -117,16 +117,16 @@ async function signOut() {
     </div>
     <LessonLibrary v-else-if="user" />
     <section v-else class="welcome view">
-      <p class="eyebrow">MAKE A LITTLE ROOM FOR ENGLISH</p>
+      <p class="eyebrow">MAKE A LITTLE ROOM FOR LANGUAGES</p>
       <h1>Keep your language<br />learning in motion.</h1>
       <p class="intro">
-        Everyday expressions, Korean meanings, and conversations that make them
-        stick.
+        English and Japanese expressions, Korean meanings, and examples that
+        make them stick.
       </p>
       <a class="kakao" href="/api/auth/kakao/login"
         >Continue with KakaoTalk →</a
       >
-      <p class="muted">A little English, every day.</p>
+      <p class="muted">A little language, every day.</p>
       <div class="welcome-preview" aria-hidden="true">
         <span class="eyebrow">READ · RECALL · REPEAT</span>
         <h2>Your next expression<br />is waiting.</h2>

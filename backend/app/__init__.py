@@ -12,6 +12,10 @@ def create_app(test_config=None):
         SECRET_KEY=os.getenv("SECRET_KEY"),
         SCRAPER_API_URL=os.getenv("SCRAPER_API_URL", ""),
         SCRAPER_API_TOKEN=os.getenv("SCRAPER_API_TOKEN", ""),
+        ENGLISH_SCRAPER_API_URL=os.getenv("ENGLISH_SCRAPER_API_URL", ""),
+        ENGLISH_SCRAPER_API_TOKEN=os.getenv("ENGLISH_SCRAPER_API_TOKEN", ""),
+        JAPANESE_SCRAPER_API_URL=os.getenv("JAPANESE_SCRAPER_API_URL", ""),
+        JAPANESE_SCRAPER_API_TOKEN=os.getenv("JAPANESE_SCRAPER_API_TOKEN", ""),
         FRONTEND_URL=os.getenv("FRONTEND_URL", "http://localhost:5173"),
         # Firebase Hosting forwards only this cookie to Cloud Run.
         SESSION_COOKIE_NAME="__session",

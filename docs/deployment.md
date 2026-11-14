@@ -87,3 +87,25 @@ firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
 - Check the production manifest, service worker, and installation on a supported device. Auth and APIs require a network.
 
 References: [Hosting with Cloud Run](https://firebase.google.com/docs/hosting/cloud-run), [Hosting session-cookie behavior](https://firebase.google.com/docs/hosting/manage-cache#using_cookies).
+
+## Shared scraper connections
+
+The bilingual lesson library uses these server-only origins:
+
+```text
+ENGLISH_SCRAPER_API_URL=https://english-scrapper.onrender.com
+JAPANESE_SCRAPER_API_URL=https://japanese-scraper.onrender.com
+```
+
+Keep existing runtime configuration and Secret Manager references when updating
+an existing service. Add these with `--update-env-vars`, rather than replacing
+all environment variables or secrets. Optional provider Bearer credentials use
+`ENGLISH_SCRAPER_API_TOKEN` and `JAPANESE_SCRAPER_API_TOKEN` through Secret Manager;
+the documented public read-only APIs currently require neither. Never use
+scraper ingestion/trigger tokens for read-only requests.
+
+After deploying Cloud Run, deploy Hosting and verify both list and detail routes
+reject signed-out access, health remains OK, and the new release manifest is
+served. Authenticated provider/UI checks require a valid Kakao session. Cold
+external services may need a retry; their availability is independent of Flask
+health. No scraping or provider database writes occur in LinguaLoop.
