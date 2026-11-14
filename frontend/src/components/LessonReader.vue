@@ -7,7 +7,7 @@ const tab = ref("Expressions");
 const tabs = computed(() =>
   props.lesson.language === "ja"
     ? ["Expressions", "Examples", "Vocabulary"]
-    : ["Dialogue", "Meaning", "Vocabulary"],
+    : ["Meaning", "Dialogue", "Vocabulary"],
 );
 watch(
   () => props.lesson.id,
