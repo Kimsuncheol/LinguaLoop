@@ -7,6 +7,7 @@ import {
   type Language,
   languageName,
   lessonDate,
+  newestLessonFirst,
 } from "../services/lessons";
 import LoadingSkeleton from "./LoadingSkeleton.vue";
 import LessonReader from "./LessonReader.vue";
@@ -50,6 +51,7 @@ async function load() {
         (item) => !target.items.some((old) => old.id === item.id),
       ),
     );
+    target.items.sort(newestLessonFirst);
     target.next = result.nextOffset;
     target.loaded = true;
   } catch (cause) {

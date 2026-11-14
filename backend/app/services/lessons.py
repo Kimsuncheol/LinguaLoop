@@ -1,5 +1,4 @@
 """Read-only adapter for the configured, shared lesson scraper."""
-from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote, urlparse
 
 import requests
@@ -91,15 +90,15 @@ def page(offset, language="en"):
     if language == "ja":
         from .japanese_lessons import page as japanese_page
         return japanese_page(offset)
-    listing = fetch("en", "/api/v1/articles", {"limit": 6, "offset": offset})
-    ids = [item["id"] for item in listing["items"]]
-    # Capture configuration while the Flask context is available; worker threads
-    # need their own application context for the shared fetch adapter.
-    app = current_app._get_current_object()
-    def load(article_id):
-        with app.app_context():
-            return detail("en", article_id)
-    with ThreadPoolExecutor(max_workers=6) as pool:
-        items = list(pool.map(load, ids))
-    next_offset = offset + len(items)
-    return {"items": items, "nextOffset": next_offset if items and next_offset < listing["total"] else None}
+    # The generic /api/v1/articles feed sorts by import time. The scraper's
+    # saved series feed paginates by publication date and includes lesson fields.
+    try:
+        listing = fetch("en", "/_dev/test-site/series/saved", {"limit": 6, "offset": offset})
+    except LessonNotFound as exc:
+        raise LessonsUnavailable() from exc
+    items = [normalize({"id": record["id"], "payload": {
+        "article": record.get("article"), "lesson": record.get("lesson"),
+        "lesson_image": record.get("lesson_image"),
+        "processing": {"status": record.get("processing_status")},
+    }}) for record in listing["items"]]
+    return {"items": items, "nextOffset": listing["next_offset"]}

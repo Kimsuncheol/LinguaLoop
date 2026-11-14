@@ -76,3 +76,14 @@ export function lessonDate(value: string | null) {
       })
     : "Date unavailable";
 }
+
+/** Keep publication dates descending across every loaded page; unknown dates last. */
+export function newestLessonFirst(a: Lesson, b: Lesson): number {
+  const timestamp = (value: string | null) => {
+    const parsed = value ? Date.parse(value) : NaN;
+    return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
+  };
+  const left = timestamp(a.date),
+    right = timestamp(b.date);
+  return left === right ? a.id.localeCompare(b.id) : left > right ? -1 : 1;
+}

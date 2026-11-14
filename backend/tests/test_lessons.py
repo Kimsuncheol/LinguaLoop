@@ -31,11 +31,10 @@ def test_validation_and_missing_configuration():
 
 def test_adapter_serializes_only_lesson_content(monkeypatch):
     def get(url, **kwargs):
+        assert url == "https://scraper.example/_dev/test-site/series/saved"
         assert kwargs['timeout'] == (3, 15)
         assert kwargs['allow_redirects'] is False
-        if url.endswith('/articles'):
-            return Mock(status_code=200, json=lambda: {"items": [{"id": "abc"}], "total": 2})
-        return Mock(status_code=200, json=lambda: {"id": "abc", "payload": {"article": {"url": "https://www.chosun.com/lesson/"}, "lesson_image": {"url": "javascript:alert(1)"}, "lesson": {"fields": {"expression": {"text": "Don't sweat it."}}}, "secret": "not-for-browser"}})
+        return Mock(status_code=200, json=lambda: {"items": [{"id": "abc", "article": {"url": "https://www.chosun.com/lesson/"}, "lesson_image": {"url": "javascript:alert(1)"}, "lesson": {"fields": {"expression": {"text": "Don't sweat it."}}}, "secret": "not-for-browser"}], "next_offset": 1})
     monkeypatch.setattr(lessons.requests, 'get', get)
     api = client(); sign_in(api)
     response = api.get('/api/lessons')
@@ -150,3 +149,34 @@ def test_english_detail_and_independent_tokens(monkeypatch):
 def test_image_links_reject_untrusted_hosts():
     for url in ['javascript:alert(1)', 'https://evil.example/image.jpg', 'https://www.chosun.com.evil.example/image.jpg', 'https://user@www.chosun.com/image.jpg', 'https://cloudfront-ap-northeast-1.images.arcpublishing.com/other/image.jpg']:
         assert lessons.safe_image_url(url) is None
+
+
+def test_publication_feed_preserves_pagination_and_does_not_fan_out(monkeypatch):
+    def get(url, **kwargs):
+        assert url.endswith("/_dev/test-site/series/saved")
+        assert kwargs["params"]["limit"] == 6
+        offset = kwargs["params"]["offset"]
+        dates = ["2026-11-12", "2026-11-09"] if offset == 0 else ["2026-11-08"]
+        return Mock(status_code=200, json=lambda: {
+            "items": [{"id": date, "article": {"published_at": date},
+                       "lesson": {"fields": {}}, "processing_status": "partial",
+                       "saved_at": "2000-01-01"} for date in dates],
+            "next_offset": 6 if offset == 0 else None})
+    mocked = Mock(side_effect=get)
+    monkeypatch.setattr(lessons.requests, "get", mocked)
+    api = client(); sign_in(api)
+    first = api.get('/api/lessons?language=en').json
+    second = api.get('/api/lessons?language=en&offset=6').json
+    assert first['nextOffset'] == 6 and second['nextOffset'] is None
+    assert [item['date'] for item in first['items'] + second['items']] == ['2026-11-12', '2026-11-09', '2026-11-08']
+    assert first['items'][0]['partial'] is True
+    assert mocked.call_count == 2
+
+
+def test_unavailable_date_ordered_feed_fails_without_unsorted_fallback(monkeypatch):
+    api = client(); sign_in(api)
+    for status in [404, 503]:
+        get = Mock(return_value=Mock(status_code=status))
+        monkeypatch.setattr(lessons.requests, 'get', get)
+        assert api.get('/api/lessons').status_code == 503
+        assert get.call_count == 1

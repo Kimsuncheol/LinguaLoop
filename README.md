@@ -104,10 +104,15 @@ does not persist scores or progress. Missing fields remain unavailable, with
 links to the original Chosun lesson image and article. All initial and paginated
 loads use skeletons; provider failures have a retry action.
 
-The scraper's `/api/v1/articles` summaries omit expressions, so the adapter uses
-at most six concurrent detail requests per page. A future upstream summary
-endpoint can replace that bounded fan-out. Live provider configuration and
-production access control for the scraper must be verified before deployment.
+English lists use the scraper's read-only `/_dev/test-site/series/saved` feed
+with `limit=6` and `offset`. Despite its legacy path, this is the existing saved
+lesson feed used by the scraper website: it sorts by lesson publication date
+before pagination and includes full lesson fields. The configured English
+service must have that route enabled (verified on the current hosted service).
+The generic `/api/v1/articles` feed sorts by import time and is deliberately not
+used as a fallback. Detail requests still use `/api/v1/articles/:id`.
+Cards from all loaded pages are also sorted by their displayed publication dates,
+with missing/invalid dates last and stable ID ordering for equal dates.
 
 ## English and Japanese library
 
@@ -136,8 +141,8 @@ Authenticated endpoints, all network-only and `Cache-Control: no-store`:
 
 The list returns `{items, nextOffset}`. Use the returned offset, or stop when
 it is null. Language defaults to English for existing clients. Japanese offsets
-map to upstream ten-record pages; English uses upstream offset pagination and
-bounded detail fan-out. Invalid language/offset/ID returns 400, signed-out access
+map to upstream ten-record pages; English uses upstream publication-ordered offset pagination without
+extra detail fan-out. Invalid language/offset/ID returns 400, signed-out access
 401, absent/unready detail 404, and provider/configuration failures a sanitized
 503. Detail IDs must use letters, digits, underscores or hyphens (max 200).
 No upstream provenance, credentials or arbitrary image hosts are exposed.
