@@ -89,6 +89,74 @@ main {
   object-fit: contain;
   border-radius: 14px;
 }
+.bento {
+  position: relative;
+  margin-left: auto;
+}
+.bento-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text);
+}
+.bento-toggle::-webkit-details-marker {
+  display: none;
+}
+.bento-toggle:hover,
+.bento[open] .bento-toggle {
+  background: var(--surface-soft);
+}
+.bento-toggle:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.bento-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 5px);
+  gap: 5px;
+}
+.bento-dots > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.bento-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 10;
+  width: 260px;
+  max-width: calc(100vw - 48px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px var(--shadow);
+}
+.bento-panel .appearance-control,
+.bento-panel .account {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.bento-panel .account > span {
+  display: inline;
+}
+.bento-panel .appearance-control > span {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+}
 .account {
   display: flex;
   align-items: center;

@@ -1,9 +1,22 @@
 <script setup lang="ts">
 import { appearance, setAppearance } from "./services/appearance";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
+const bento = ref<HTMLDetailsElement | null>(null);
+function closeBento(event: Event) {
+  if (bento.value && !bento.value.contains(event.target as Node)) {
+    bento.value.open = false;
+  }
+}
+function dismissBento() {
+  if (!bento.value?.open) return;
+  bento.value.open = false;
+  bento.value.querySelector("summary")?.focus();
+}
+onMounted(() => document.addEventListener("click", closeBento));
+onUnmounted(() => document.removeEventListener("click", closeBento));
 const user = ref<User | null>(null),
   loading = ref(true),
   signingOut = ref(false),
@@ -40,22 +53,29 @@ async function signOut() {
         <img class="brand-icon" src="/lingualoop-logo.png" alt="" width="44" height="44" />
         <span>LinguaLoop</span>
       </a>
-      <div class="header-actions">
-        <label class="appearance-control">
-          <span>Appearance</span>
-          <select :value="appearance" @change="setAppearance(($event.target as HTMLSelectElement).value)">
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <div v-if="user" class="account">
-          <span>{{ user.name }}</span
-          ><button class="text-button" :disabled="signingOut" @click="signOut">
-            {{ signingOut ? "Signing out…" : "Sign out" }}
-          </button>
+      <details ref="bento" class="bento" @keydown.esc.stop.prevent="dismissBento">
+        <summary class="bento-toggle" aria-label="Open settings and account">
+          <span class="bento-dots" aria-hidden="true">
+            <span v-for="dot in 9" :key="dot"></span>
+          </span>
+        </summary>
+        <div class="bento-panel">
+          <label class="appearance-control">
+            <span>Appearance</span>
+            <select :value="appearance" @change="setAppearance(($event.target as HTMLSelectElement).value)">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <div v-if="user" class="account">
+            <span>{{ user.name }}</span
+            ><button class="text-button" :disabled="signingOut" @click="signOut">
+              {{ signingOut ? "Signing out…" : "Sign out" }}
+            </button>
+          </div>
         </div>
-      </div>
+      </details>
     </header>
     <LoadingSkeleton v-if="loading" label="Loading your session" />
     <div v-else-if="error" role="alert" class="error">
