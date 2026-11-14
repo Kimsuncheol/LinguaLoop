@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { vocabularyItems } from "../services/vocabulary";
 import type { Lesson } from "../services/lessons";
 const props = defineProps<{ lesson: Lesson }>();
 defineEmits<{ practice: [] }>();
+const wordItems = computed(() => vocabularyItems(props.lesson.words));
 const tab = ref("Expressions");
 const tabs = computed(() =>
   props.lesson.language === "ja"
@@ -174,34 +176,51 @@ function navigate(event: KeyboardEvent) {
         </section>
       </template>
       <template v-else-if="section === 'Vocabulary'">
-        <section
-          v-for="(word, i) in lesson.vocabulary"
-          :key="i"
-          class="expression-block"
+        <ul
+          v-if="
+            lesson.vocabulary.length || wordItems.length || lesson.notes.length
+          "
+          class="vocabulary-list"
         >
-          <h2 lang="ja">{{ word.text }}</h2>
-          <p v-if="word.reading" class="reading" lang="ja">
-            {{ word.reading }}
-          </p>
-          <p v-if="word.meaning" lang="ko">{{ word.meaning }}</p>
-          <p v-if="word.explanation" lang="ko">{{ word.explanation }}</p>
-          <div
-            v-for="(example, j) in word.examples"
-            :key="j"
-            class="example-block"
+          <li v-for="(word, i) in lesson.vocabulary" :key="`word-${i}`">
+            <h3 :lang="lesson.language">{{ word.text }}</h3>
+            <p v-if="word.reading" class="reading" :lang="lesson.language">
+              {{ word.reading }}
+            </p>
+            <p v-if="word.meaning" lang="ko">{{ word.meaning }}</p>
+            <p v-if="word.explanation" lang="ko">{{ word.explanation }}</p>
+            <div
+              v-for="(example, j) in word.examples"
+              :key="j"
+              class="example-block"
+            >
+              <p :lang="lesson.language">{{ example.text }}</p>
+              <p v-if="example.reading" :lang="lesson.language">
+                {{ example.reading }}
+              </p>
+              <p v-if="example.meaning" lang="ko">{{ example.meaning }}</p>
+            </div>
+          </li>
+          <li
+            v-for="(item, i) in wordItems"
+            :key="`text-${i}`"
+            class="lesson-copy"
           >
-            <p lang="ja">{{ example.text }}</p>
-            <p v-if="example.reading" lang="ja">{{ example.reading }}</p>
-            <p v-if="example.meaning" lang="ko">{{ example.meaning }}</p>
-          </div>
-        </section>
-        <p v-if="lesson.words" class="lesson-copy">{{ lesson.words }}</p>
-        <p v-for="(note, i) in lesson.notes" :key="i" class="lesson-copy">
-          {{ note }}
-        </p>
+            {{ item }}
+          </li>
+          <li
+            v-for="(note, i) in lesson.notes"
+            :key="`note-${i}`"
+            class="lesson-copy"
+          >
+            {{ note }}
+          </li>
+        </ul>
         <p
           v-if="
-            !lesson.words && !lesson.vocabulary.length && !lesson.notes.length
+            !wordItems.length &&
+            !lesson.vocabulary.length &&
+            !lesson.notes.length
           "
         >
           Vocabulary is unavailable for this lesson.

@@ -662,3 +662,10 @@ progress {
 .exit-dialog h2 { margin: 0 0 12px; font-size: 24px; }
 .exit-dialog p { color: var(--muted); line-height: 1.7; }
 .exit-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+.vocabulary-list { margin: 0; padding-inline-start: 1.4em; }
+.vocabulary-list > li { padding-inline-start: 4px; margin-bottom: 20px; overflow-wrap: anywhere; }
+.vocabulary-list > li:last-child { margin-bottom: 0; }
+.vocabulary-list > li::marker { color: var(--accent); }
+.vocabulary-list h3 { margin: 0 0 6px; font-size: 20px; line-height: 1.4; }
+.vocabulary-list p { margin: 8px 0; }
