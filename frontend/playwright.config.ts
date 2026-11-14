@@ -9,6 +9,8 @@ export default defineConfig({
     baseURL: deployed || "http://127.0.0.1:5187",
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
+    // Route fixtures must not be bypassed by the production PWA worker.
+    serviceWorkers: "block",
   },
   webServer: deployed
     ? undefined
