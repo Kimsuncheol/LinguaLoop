@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   meaningParagraphs,
+  expressionParts,
   dialogueTurns,
   dialogueMessages,
 } from "../src/services/lessonText.ts";
@@ -68,4 +69,29 @@ test("speaker label variants preserve negative numbers in spoken text", () => {
       { speaker: "B", text: "One more line." },
     ],
   );
+});
+
+test("expression emphasis preserves spelling and handles case and apostrophe variants", () => {
+  const text = "'sing one's praises'와 SING ONE’S PRAISES를 쓴다.";
+  const parts = expressionParts(text, "sing one's praises");
+  assert.deepEqual(
+    parts.filter((p) => p.emphasized).map((p) => p.text),
+    ["sing one's praises", "SING ONE’S PRAISES"],
+  );
+  assert.equal(parts.map((p) => p.text).join(""), text);
+});
+test("expression emphasis treats regex punctuation literally and avoids word fragments", () => {
+  assert.equal(
+    expressionParts("C++ and C++.", "C++").filter((p) => p.emphasized).length,
+    2,
+  );
+  assert.deepEqual(
+    expressionParts("conversation on ongoing", "on")
+      .filter((p) => p.emphasized)
+      .map((p) => p.text),
+    ["on"],
+  );
+  assert.deepEqual(expressionParts("Original text", null), [
+    { text: "Original text", emphasized: false },
+  ]);
 });

@@ -149,6 +149,7 @@ function navigate(event: KeyboardEvent) {
           <LessonMeaning
             v-if="expression.explanation"
             :text="expression.explanation"
+            :expression="expression.text"
           />
         </section>
         <p v-if="!lesson.expressions.length">
@@ -230,7 +231,11 @@ function navigate(event: KeyboardEvent) {
         </p>
       </template>
       <template v-else-if="section === 'Meaning'">
-        <LessonMeaning v-if="lesson.explanation" :text="lesson.explanation" />
+        <LessonMeaning
+          v-if="lesson.explanation"
+          :text="lesson.explanation"
+          :expression="lesson.expression"
+        />
         <p v-else>
           This section is unavailable. Compare the original lesson below.
         </p>

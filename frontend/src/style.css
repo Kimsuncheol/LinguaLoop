@@ -681,12 +681,15 @@ progress {
 .reader-content .dialogue-chat .bubble_chat_wrapper__rolled_down,
 .reader-content .dialogue-chat .bubble_chat_wrapper__rolled_down__list,
 .reader-content .dialogue-chat .scroll { position: static; width: 100%; height: auto; overflow: visible; }
-.reader-content .dialogue-chat .scroll > div { display: flex; justify-content: flex-start; margin: 16px 0; }
-.reader-content .dialogue-chat .scroll > .mine { justify-content: flex-end; }
-.reader-content .dialogue-chat .scroll > div > div { max-width: 90%; padding: 16px 18px; border-radius: 16px 16px 16px 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text); overflow-wrap: anywhere; }
+.reader-content .dialogue-chat .scroll > div { display: flex; justify-content: flex-start; align-items: flex-start; gap: 10px; margin: 16px 0; }
+.reader-content .dialogue-chat .scroll > .mine { justify-content: flex-start; flex-direction: row-reverse; }
+.reader-content .dialogue-chat .scroll > div > div { max-width: min(78%, calc(100% - 88px)); min-width: 0; padding: 16px 18px; border-radius: 16px 16px 16px 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text); overflow-wrap: anywhere; }
 .reader-content .dialogue-chat .scroll > .mine > div { border-radius: 16px 16px 4px 16px; background: var(--feature-bg); border-color: var(--feature-bg); color: var(--on-feature); }
-.reader-content .dialogue-chat .name { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; }
+.reader-content .dialogue-chat .character-badge { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; margin: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; }
+.reader-content .dialogue-chat .mine > .character-badge { background: var(--feature-bg); border-color: var(--feature-bg); color: var(--on-feature); }
 .reader-content .dialogue-chat .msg { display: block; white-space: pre-wrap; font-size: 18px; line-height: 1.7; }
 .reader-content .dialogue-chat .bubble-translation { margin: 12px 0 0; white-space: pre-wrap; font-size: 15px; line-height: 1.7; opacity: .88; }
 .dialogue-skeleton > div { width: 85%; height: 100px; margin: 16px 0; border-radius: 16px; }
 .dialogue-skeleton > div:nth-of-type(even) { margin-left: auto; }
+
+.meaning-copy strong { font-weight: 750; color: var(--text); }

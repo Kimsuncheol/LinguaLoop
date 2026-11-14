@@ -56,6 +56,12 @@ export async function mountBubbleChat(
     row.setAttribute("role", "listitem");
     row.setAttribute("data-speaker", message.speaker);
     row.querySelector(".no_image")?.setAttribute("aria-hidden", "true");
+    const badge = row.querySelector<HTMLElement>(".name");
+    const bubble = row.firstElementChild;
+    if (badge && bubble) {
+      badge.classList.add("character-badge");
+      row.insertBefore(badge, bubble);
+    }
     const text = row.querySelector(".msg");
     text?.setAttribute("lang", language);
     if (message.translation && text) {

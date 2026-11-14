@@ -77,3 +77,39 @@ export function dialogueMessages(
     separateTranslation: aligned ? null : translation,
   };
 }
+
+/** Highlight literal expression matches while keeping source text and markup safe. */
+export function expressionParts(
+  text: string,
+  expression: string | null | undefined,
+) {
+  if (!expression?.trim()) return [{ text, emphasized: false }];
+  const pattern = expression
+    .trim()
+    .split(/\s+/)
+    .map((word) =>
+      [...word]
+        .map((char) =>
+          /['’‘]/.test(char)
+            ? "['’‘]"
+            : char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        )
+        .join(""),
+    )
+    .join("\\s+");
+  const matches = text.matchAll(
+    new RegExp(`(^|[^A-Za-z0-9])(${pattern})(?=$|[^A-Za-z0-9])`, "gi"),
+  );
+  const parts: { text: string; emphasized: boolean }[] = [];
+  let cursor = 0;
+  for (const match of matches) {
+    const start = match.index! + match[1]!.length;
+    if (start > cursor)
+      parts.push({ text: text.slice(cursor, start), emphasized: false });
+    parts.push({ text: match[2]!, emphasized: true });
+    cursor = start + match[2]!.length;
+  }
+  if (cursor < text.length)
+    parts.push({ text: text.slice(cursor), emphasized: false });
+  return parts.length ? parts : [{ text, emphasized: false }];
+}

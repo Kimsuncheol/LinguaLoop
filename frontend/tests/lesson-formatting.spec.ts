@@ -11,7 +11,8 @@ async function fixture(
     expression: "Nice to see you",
     meaning: "만나서 반가워요",
     reading: null,
-    explanation: "첫 문장이다.두 번째 문장이다.\n\n참고로 다른 표현도 있다.",
+    explanation:
+      "첫 문장이다.두 번째 문장 Nice to see you이다.\n\n참고로 다른 표현도 있다.",
     dialogue,
     translation: "A 안녕하세요.\nB 만나서 반가워요.\nA 저도요.",
     words: null,
@@ -46,6 +47,9 @@ test("meaning paragraphs and the real vue-bubble-chat renderer show A left and B
   await expect(
     page.locator("#lesson-section-Meaning .meaning-copy p"),
   ).toHaveCount(3);
+  await expect(page.locator("#lesson-section-Meaning strong")).toHaveText(
+    "Nice to see you",
+  );
   const rows = page.locator(".dialogue-chat .scroll > div");
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toHaveAttribute("data-speaker", "A");
@@ -56,8 +60,21 @@ test("meaning paragraphs and the real vue-bubble-chat renderer show A left and B
     bRow = (await rows.nth(1).boundingBox())!;
   const a = (await rows.nth(0).locator(":scope > div").boundingBox())!;
   const b = (await rows.nth(1).locator(":scope > div").boundingBox())!;
-  expect(a.x).toBeCloseTo(aRow.x, 0);
-  expect(b.x + b.width).toBeCloseTo(bRow.x + bRow.width, 0);
+  const aBadge = rows.nth(0).locator(":scope > .character-badge"),
+    bBadge = rows.nth(1).locator(":scope > .character-badge");
+  await expect(aBadge).toHaveText("A");
+  await expect(bBadge).toHaveText("B");
+  await expect(aBadge).toHaveCSS("border-radius", "50%");
+  await expect(bBadge).toHaveCSS("border-radius", "50%");
+  const aCircle = (await aBadge.boundingBox())!,
+    bCircle = (await bBadge.boundingBox())!;
+  expect(aCircle.width).toBe(aCircle.height);
+  expect(bCircle.width).toBe(bCircle.height);
+  expect(aCircle.x).toBeCloseTo(aRow.x, 0);
+  expect(aCircle.x + aCircle.width).toBeLessThan(a.x);
+  expect(b.x + b.width).toBeLessThan(bCircle.x);
+  expect(bCircle.x + bCircle.width).toBeCloseTo(bRow.x + bRow.width, 0);
+  await expect(rows.locator(":scope > div .name")).toHaveCount(0);
   expect(b.x).toBeGreaterThan(a.x);
   await expect(rows.nth(0).locator(".bubble-translation")).toHaveText(
     "안녕하세요.",
