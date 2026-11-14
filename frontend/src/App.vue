@@ -4,6 +4,7 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
+import ReleaseBanner from "./components/ReleaseBanner.vue";
 const bento = ref<HTMLDetailsElement | null>(null);
 function closeBento(event: Event) {
   if (bento.value && !bento.value.contains(event.target as Node)) {
@@ -77,6 +78,7 @@ async function signOut() {
         </div>
       </details>
     </header>
+    <ReleaseBanner />
     <LoadingSkeleton v-if="loading" label="Loading your session" />
     <div v-else-if="error" role="alert" class="error">
       <p>{{ error }}</p>

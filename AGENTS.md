@@ -48,6 +48,7 @@
 - Report checks run, configuration still needed, and any unverified provider behavior.
 
 ## Automatic redeployment
+- Update `frontend/release-notes.json` with a short user-facing summary for every requested app change. Each production build generates a release identifier so the in-app banner announces the deployment, including to users who already have the app open.
 - After completing any requested project changes and passing the applicable checks, automatically redeploy without asking for confirmation unless the user explicitly asks not to deploy.
 - Follow docs/deployment.md and use the explicitly configured Firebase project, lingualoop-kr-2026. Deploy Cloud Run (lingualoop-api, asia-east1) before Firebase Hosting, preserve existing runtime configuration and secrets, and verify the public site and API health after deployment.
 - If authentication, permissions, configuration, or deployment errors prevent redeployment, report the blocker and preserve the completed changes. Never claim deployment succeeded without verification.

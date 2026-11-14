@@ -93,6 +93,33 @@ main {
   position: relative;
   margin-left: auto;
 }
+.release-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 14px;
+}
+.release-banner > div:first-child {
+  flex: 1 1 240px;
+}
+.release-banner p {
+  margin: 6px 0 0;
+  line-height: 1.6;
+}
+.release-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
 .bento-toggle {
   display: flex;
   align-items: center;
