@@ -78,6 +78,41 @@ const practice = (page: Page) =>
   ).toBeVisible();
 
 // All data and authentication are fixture responses; tests never contact providers.
+test("dashboard scroll loads both languages and pauses on pagination errors", async ({ page }) => {
+  await fixture(page);
+  const requests: string[] = [];
+  let fail = true;
+  await page.route("**/api/lessons?**", (route) => {
+    const url = new URL(route.request().url());
+    const language = url.searchParams.get("language")!;
+    const offset = Number(url.searchParams.get("offset"));
+    requests.push(`${language}:${offset}`);
+    if (offset && fail)
+      return route.fulfill({ status: 503, json: { error: "lessons_unavailable" } });
+    return route.fulfill({ json: {
+      items: Array.from({ length: 6 }, (_, i) => lesson(`${language}-${offset + i}`, language)),
+      nextOffset: offset ? null : 6,
+    } });
+  });
+  await page.goto("/");
+  await expect(page.locator(".lesson-card")).toHaveCount(6);
+  expect(requests).toEqual(["en:0"]);
+  await page.locator(".load-more").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.locator(".lesson-card")).toHaveCount(6);
+  expect(requests).toEqual(["en:0", "en:6"]);
+  fail = false;
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(page.locator(".lesson-card")).toHaveCount(12);
+  await expect(page.locator(".load-more")).toHaveCount(0);
+  await page.getByRole("button", { name: "Japanese", exact: true }).click();
+  await expect(page.locator(".lesson-card")).toHaveCount(6);
+  await page.locator(".load-more").scrollIntoViewIfNeeded();
+  await expect(page.locator(".lesson-card")).toHaveCount(12);
+  await expect(page.locator(".load-more")).toHaveCount(0);
+  expect(requests).toEqual(["en:0", "en:6", "en:6", "ja:0", "ja:6"]);
+});
+
 test("focused navigation headings have no frame in light and dark themes", async ({ page }) => {
   await fixture(page);
   await page.goto("/");

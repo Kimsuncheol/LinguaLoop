@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import {
   lessons,
   lesson,
@@ -158,8 +158,31 @@ function startPractice(items: Lesson[]) {
 function retry() {
   void restoreView(view.value);
 }
+const loadMoreTarget = ref<HTMLElement | null>(null);
+let loadMoreObserver: IntersectionObserver | undefined;
+watch(
+  [loadMoreTarget, loading, error, () => state.value.next, () => view.value.kind, language],
+  () => {
+    loadMoreObserver?.disconnect();
+    loadMoreObserver = undefined;
+    if (
+      !loadMoreTarget.value || loading.value || error.value ||
+      view.value.kind !== "dashboard" || state.value.next === null ||
+      !state.value.loaded || !state.value.items.length ||
+      typeof IntersectionObserver === "undefined"
+    ) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (loadMoreObserver === observer && entries.some((entry) => entry.isIntersecting) && !error.value && view.value.kind === "dashboard")
+        void load();
+    }, { rootMargin: "0px 0px 240px 0px" });
+    loadMoreObserver = observer;
+    loadMoreObserver.observe(loadMoreTarget.value);
+  },
+  { flush: "post" },
+);
 defineExpose({ home });
 onUnmounted(() => {
+  loadMoreObserver?.disconnect();
   listController?.abort();
   detailController?.abort();
 });
@@ -326,6 +349,7 @@ onUnmounted(() => {
       </div>
       <button
         v-if="!error && state.next !== null && state.items.length"
+        ref="loadMoreTarget"
         class="secondary load-more"
         :disabled="loading"
         @click="load"
