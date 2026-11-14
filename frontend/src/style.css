@@ -72,16 +72,22 @@ main {
   gap: 20px;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
   font-size: 27px;
   letter-spacing: -1.2px;
   font-weight: 800;
   text-decoration: none;
   color: var(--text);
 }
-.brand-dot {
-  color: var(--brand-dot);
-  font-size: 13px;
-  margin-left: 4px;
+.brand-icon {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 14px;
 }
 .account {
   display: flex;

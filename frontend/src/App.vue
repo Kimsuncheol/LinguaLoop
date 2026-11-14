@@ -36,7 +36,10 @@ async function signOut() {
 <template>
   <main>
     <header class="app-header">
-      <a class="brand" href="/">lingualoop<span class="brand-dot">●</span></a>
+      <a class="brand" href="/" aria-label="LinguaLoop home">
+        <img class="brand-icon" src="/lingualoop-logo.png" alt="" width="44" height="44" />
+        <span>LinguaLoop</span>
+      </a>
       <div class="header-actions">
         <label class="appearance-control">
           <span>Appearance</span>
