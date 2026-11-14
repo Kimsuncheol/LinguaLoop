@@ -28,6 +28,8 @@ function lesson(id: string, language = "en") {
   };
 }
 async function fixture(page: Page) {
+  // Navigation checks dismiss release notices; snackbar behavior has its own suite.
+  await page.addInitScript(() => localStorage.setItem("lingualoop-dismissed-release", "2099-01-01T00:00:00.000Z"));
   const control = { failed: false, release: () => {} };
   await page.route("**/back-sentinel", (route) =>
     route.fulfill({

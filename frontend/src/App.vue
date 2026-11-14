@@ -4,7 +4,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
-import ReleaseBanner from "./components/ReleaseBanner.vue";
+import ReleaseSnackbar from "./components/ReleaseSnackbar.vue";
 const library = ref<InstanceType<typeof LessonLibrary> | null>(null);
 function goHome() {
   if (library.value) library.value.home();
@@ -113,7 +113,7 @@ async function signOut() {
         </div>
       </details>
     </header>
-    <ReleaseBanner />
+    <ReleaseSnackbar />
     <LoadingSkeleton v-if="loading" label="Loading your session" />
     <div v-else-if="error" role="alert" class="error">
       <p>{{ error }}</p>

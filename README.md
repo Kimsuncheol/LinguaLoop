@@ -68,13 +68,13 @@ PWA caching applies to the static app shell in production builds. API responses 
 
 ## Production
 
-Every production build generates `/app-release.json`. The update banner shows
+Every production build generates `/app-release.json`. The fixed-bottom update snackbar shows
 `frontend/release-notes.json` once per release until dismissed on that browser.
 Update that file with a brief user-facing summary whenever the app changes.
 Open tabs check for releases every minute while visible and when returning to
 the app, focusing its window, or reconnecting. Each new release displays an
-“Update recommended” banner with an “Update now” action, even if a previous
-release was dismissed. After updating, the banner confirms the update is installed.
+“Update recommended” snackbar with an “Update now” action, even if a previous
+release was dismissed. After updating, the snackbar confirms the update is installed.
 Offline checks do not interrupt learning. The manifest is network-only and
 contains no user data.
 

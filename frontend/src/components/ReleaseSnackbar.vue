@@ -111,19 +111,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <aside v-if="visible" class="release-banner" aria-label="LinguaLoop update">
+  <aside v-if="visible" class="release-snackbar" aria-label="LinguaLoop update">
     <div role="status" aria-live="polite" aria-atomic="true">
       <strong>{{ updateAvailable ? "Update recommended" : "LinguaLoop has been updated" }}</strong>
       <p>{{ release.message }}</p>
       <p v-if="updateAvailable">Update now to get the latest improvements. Your page will refresh.</p>
-      <p v-else>This update is installed.</p>
       <p v-if="error">{{ error }}</p>
     </div>
     <div class="release-actions">
       <button v-if="updateAvailable" class="primary" :disabled="refreshing" @click="refresh">
         {{ refreshing ? "Updating…" : "Update now" }}
       </button>
-      <button class="text-button" :disabled="refreshing" aria-label="Dismiss update banner" @click="dismiss">
+      <button class="text-button" :disabled="refreshing" aria-label="Dismiss update notification" @click="dismiss">
         Dismiss
       </button>
     </div>
