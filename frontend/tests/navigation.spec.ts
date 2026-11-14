@@ -98,9 +98,14 @@ test("Back and Forward restore nested lessons, practice position and dashboard",
     .getByRole("button", { name: "Open full lesson ↗", exact: true })
     .click();
   await detail(page);
+  await expect(page.locator(".reader-content > h1")).toHaveText("first");
+  await expect(page.locator(".reader-content > .meaning")).toHaveText(
+    "Meaning first",
+  );
+  await expect(page.locator(".reader-content > .eyebrow")).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "← Back to practice", exact: true }),
-  ).toBeVisible();
+    page.locator(".reader-content > button.text-button"),
+  ).toHaveCount(0);
   await page.goBack();
   await practice(page);
   await expect(page.locator(".practice h1")).toHaveText("first two");
@@ -117,9 +122,7 @@ test("Back and Forward restore nested lessons, practice position and dashboard",
   await practice(page);
   await page.getByRole("button", { name: "← Back", exact: true }).click();
   await detail(page);
-  await page
-    .getByRole("button", { name: "← Back to library", exact: true })
-    .click();
+  await page.goBack();
   await dashboard(page);
 });
 

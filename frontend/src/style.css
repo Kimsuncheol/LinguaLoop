@@ -643,7 +643,7 @@ progress {
 .expression-block h2 { font-size: 24px; overflow-wrap: anywhere; }
 .example-block { padding: 8px 0; }
 .reader-skeleton-body { height: 340px; width: 100%; margin-top: 32px; border-radius: 20px; }
-.detail-skeleton .skeleton-heading { margin-top: 28px; width: 90%; }
+.detail-skeleton .skeleton-heading { margin-top: 12px; width: 90%; }
 @media (max-width: 800px) { .reader-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; } .lesson-sidebar { display: none; } }
 
 .lesson-section-heading { margin-top: 0; font-size: 20px; }

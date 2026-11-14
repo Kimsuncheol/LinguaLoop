@@ -239,10 +239,7 @@ onUnmounted(() => {
           role="status"
           aria-label="Loading lesson detail"
         >
-          <button class="text-button" @click="back">
-            {{ backLabel }}</button><span class="sr-only"
-            >Loading lesson detail</span
-          >
+          <span class="sr-only">Loading lesson detail</span>
           <div class="skeleton skeleton-heading" aria-hidden="true"></div>
           <div class="skeleton skeleton-subtitle" aria-hidden="true"></div>
           <div class="skeleton reader-skeleton-body" aria-hidden="true"></div>
@@ -255,8 +252,6 @@ onUnmounted(() => {
         <LessonReader
           v-else-if="selected"
           :lesson="selected"
-          :back-label="backLabel"
-          @back="back"
           @practice="startPractice([selected])"
         />
       </div>
