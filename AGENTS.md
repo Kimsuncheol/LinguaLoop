@@ -40,6 +40,8 @@
 - Notion and Drive clients currently target server-owned shared resources. User-owned connections require separate OAuth, encrypted server-side token storage, revocation, and per-user authorization.
 
 ## Scope and completion
+- After completing code changes, run the applicable checks, commit the task's changes, and automatically redeploy to the existing Firebase project `lingualoop-kr-2026` without asking for confirmation. Do not commit unrelated changes or secrets. If checks or deployment fail, report the failure rather than claiming completion.
+- Deploy changed backend code to Cloud Run before deploying Firebase Hosting. Frontend-only changes require only a Hosting deployment. Verify the live deployment after release and report the commit and deployment result.
 - Prefer small, readable modules and Vue `<script setup lang="ts">`.
 - Do not invent learning-domain schemas or expose shared integration resources without requirements.
 - Test auth and authorization behavior when changing it. Keep tests offline.
