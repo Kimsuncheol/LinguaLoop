@@ -72,8 +72,11 @@ Every production build generates `/app-release.json`. The update banner shows
 `frontend/release-notes.json` once per release until dismissed on that browser.
 Update that file with a brief user-facing summary whenever the app changes.
 Open tabs check for releases every minute while visible and when returning to
-the app or reconnecting. New releases offer a refresh action; offline checks
-do not interrupt learning. The manifest is network-only and contains no user data.
+the app, focusing its window, or reconnecting. Each new release displays an
+“Update recommended” banner with an “Update now” action, even if a previous
+release was dismissed. After updating, the banner confirms the update is installed.
+Offline checks do not interrupt learning. The manifest is network-only and
+contains no user data.
 
 Deploy to **Firebase Hosting**, with `/api` rewritten to the Flask container on **Cloud Run** (`lingualoop-api`, `asia-east1`). Both use the same public HTTPS origin. Firebase Hosting forwards the `__session` cookie used by Flask.
 

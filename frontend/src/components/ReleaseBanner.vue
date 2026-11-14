@@ -96,6 +96,7 @@ onMounted(() => {
   void checkForRelease();
   interval = setInterval(checkForRelease, 60000);
   document.addEventListener("visibilitychange", checkForRelease);
+  window.addEventListener("focus", checkForRelease);
   window.addEventListener("online", checkForRelease);
   window.addEventListener("storage", readDismissal);
 });
@@ -103,6 +104,7 @@ onUnmounted(() => {
   clearInterval(interval);
   request?.abort();
   document.removeEventListener("visibilitychange", checkForRelease);
+  window.removeEventListener("focus", checkForRelease);
   window.removeEventListener("online", checkForRelease);
   window.removeEventListener("storage", readDismissal);
 });
@@ -111,13 +113,15 @@ onUnmounted(() => {
 <template>
   <aside v-if="visible" class="release-banner" aria-label="LinguaLoop update">
     <div role="status" aria-live="polite" aria-atomic="true">
-      <strong>{{ updateAvailable ? "A LinguaLoop update is ready" : "What’s new in LinguaLoop" }}</strong>
+      <strong>{{ updateAvailable ? "Update recommended" : "LinguaLoop has been updated" }}</strong>
       <p>{{ release.message }}</p>
+      <p v-if="updateAvailable">Update now to get the latest improvements. Your page will refresh.</p>
+      <p v-else>This update is installed.</p>
       <p v-if="error">{{ error }}</p>
     </div>
     <div class="release-actions">
-      <button v-if="updateAvailable" class="secondary" :disabled="refreshing" @click="refresh">
-        {{ refreshing ? "Updating…" : "Refresh to update" }}
+      <button v-if="updateAvailable" class="primary" :disabled="refreshing" @click="refresh">
+        {{ refreshing ? "Updating…" : "Update now" }}
       </button>
       <button class="text-button" :disabled="refreshing" aria-label="Dismiss update banner" @click="dismiss">
         Dismiss
