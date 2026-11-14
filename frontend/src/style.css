@@ -202,12 +202,6 @@ main {
 .appearance-mode {
   text-transform: capitalize;
 }
-.menu-ripple {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 50%;
-  background: currentColor;
-}
 .menu-tile-loading .menu-icon-skeleton {
   width: 20px;
   height: 20px;

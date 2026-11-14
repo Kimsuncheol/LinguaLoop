@@ -5,7 +5,6 @@ import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
 import ReleaseBanner from "./components/ReleaseBanner.vue";
-import { ripple } from "./services/ripple";
 const library = ref<InstanceType<typeof LessonLibrary> | null>(null);
 function goHome() {
   if (library.value) library.value.home();
@@ -69,7 +68,7 @@ async function signOut() {
             <span v-for="dot in 9" :key="dot"></span>
           </span>
         </summary>
-        <div class="bento-panel" @click.capture="ripple">
+        <div class="bento-panel">
           <button
             class="menu-tile"
             :aria-label="`Appearance: ${appearance}. Switch to ${nextAppearance}`"
