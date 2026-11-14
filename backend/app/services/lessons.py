@@ -1,5 +1,7 @@
 """Read-only adapter for the configured, shared lesson scraper."""
 from urllib.parse import quote, urlparse
+from datetime import date
+import re
 
 import requests
 from flask import current_app
@@ -33,17 +35,37 @@ def safe_image_url(value):
     return None
 
 
+def publication_date(record, article):
+    value = record.get("issue_date")
+    match = re.search(r"/national/nie/english/(\d{4})/(\d{2})/(\d{2})/", str(article.get("url") or ""))
+    if match:
+        value = "-".join(match.groups())
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value).isoformat()
+        except ValueError:
+            pass
+    return article.get("published_at")
+
+
 def normalize(record):
     payload = record.get("payload") or {}
     article = payload.get("article") or {}
     lesson = payload.get("lesson") or {}
     fields = lesson.get("fields") or {}
+    sections = {section.get("key"): section.get("text")
+                for section in (payload.get("content") or {}).get("sections", [])
+                if isinstance(section, dict)}
     def field(name):
         value = fields.get(name) or {}
-        return value.get("text") if isinstance(value.get("text"), str) else None
+        text = value.get("text")
+        if isinstance(text, str) and text.strip():
+            return text
+        fallback = sections.get(name)
+        return fallback if isinstance(fallback, str) and fallback.strip() else None
     return {
         "id": record["id"], "language": "en", "reading": None, "title": article.get("title"),
-        "date": article.get("published_at"), "sourceUrl": safe_url(article.get("url")),
+        "date": publication_date(record, article), "sourceUrl": safe_url(article.get("url")),
         "imageUrl": safe_image_url((payload.get("lesson_image") or {}).get("url")),
         "expression": field("expression"), "meaning": field("korean_meaning"),
         "explanation": field("korean_explanation"), "dialogue": field("english_dialogue"),
@@ -96,7 +118,7 @@ def page(offset, language="en"):
         listing = fetch("en", "/_dev/test-site/series/saved", {"limit": 6, "offset": offset})
     except LessonNotFound as exc:
         raise LessonsUnavailable() from exc
-    items = [normalize({"id": record["id"], "payload": {
+    items = [normalize({"id": record["id"], "issue_date": record.get("issue_date"), "payload": {
         "article": record.get("article"), "lesson": record.get("lesson"),
         "lesson_image": record.get("lesson_image"),
         "processing": {"status": record.get("processing_status")},

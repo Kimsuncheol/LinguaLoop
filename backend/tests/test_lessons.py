@@ -180,3 +180,21 @@ def test_unavailable_date_ordered_feed_fails_without_unsorted_fallback(monkeypat
         monkeypatch.setattr(lessons.requests, 'get', get)
         assert api.get('/api/lessons').status_code == 503
         assert get.call_count == 1
+
+
+def test_english_issue_date_uses_article_day_not_previous_day_timestamp():
+    from app.services.lessons import normalize
+    record = {"id": "dated", "payload": {"article": {
+        "url": "https://www.chosun.com/national/nie/english/2026/11/11/EXAMPLE/",
+        "published_at": "2026-11-10T12:00:00Z"}}}
+    assert normalize(record)["date"] == "2026-11-11"
+
+
+def test_english_content_sections_supply_missing_legacy_fields():
+    from app.services.lessons import normalize
+    record = {"id": "organized", "payload": {"lesson": {"fields": {}},
+        "content": {"sections": [{"key": "korean_meaning", "text": "뜻"},
+                                 {"key": "english_dialogue", "text": "A Hello."}]}}}
+    value = normalize(record)
+    assert value["meaning"] == "뜻"
+    assert value["dialogue"] == "A Hello."
