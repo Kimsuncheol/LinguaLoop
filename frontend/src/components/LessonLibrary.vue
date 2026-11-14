@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onUnmounted, reactive, ref } from "vue";
 import {
   lessons,
   lesson,
@@ -9,6 +9,7 @@ import {
   lessonDate,
   newestLessonFirst,
 } from "../services/lessons";
+import { useLibraryNavigation, type LibraryView } from "../services/navigation";
 import LoadingSkeleton from "./LoadingSkeleton.vue";
 import LessonReader from "./LessonReader.vue";
 import LessonPractice from "./LessonPractice.vue";
@@ -60,62 +61,126 @@ async function load() {
     if (listController === controller) loading.value = false;
   }
 }
-function switchLanguage(value: Language) {
-  if (value === language.value) return;
+const detailCache = new Map<string, Lesson>();
+const practiceLoading = ref(false),
+  practiceError = ref("");
+const { entry, view, navigate, back, home } = useLibraryNavigation(restoreView);
+const backLabel = computed(() =>
+  entry.value.parent === "practice"
+    ? "← Back to practice"
+    : entry.value.parent === "lesson"
+      ? "← Previous lesson"
+      : "← Back to library",
+);
+async function restoreView(target: LibraryView) {
   listController?.abort();
   detailController?.abort();
   loading.value = false;
   detailLoading.value = false;
-  language.value = value;
-  selected.value = null;
-  practice.value = null;
+  practiceLoading.value = false;
   error.value = "";
   detailError.value = "";
-  if (!state.value.loaded) void load();
-}
-async function open(item: Lesson) {
-  detailController?.abort();
+  practiceError.value = "";
+  selected.value = null;
+  practice.value = null;
+  language.value = target.language;
+  if (target.kind === "dashboard") {
+    if (!state.value.loaded) await load();
+    return;
+  }
   const controller = new AbortController();
   detailController = controller;
-  practice.value = null;
-  selected.value = item;
-  detailLoading.value = true;
-  detailError.value = "";
-  try {
-    const result = await lesson(item.language, item.id, controller.signal);
-    if (!controller.signal.aborted) selected.value = result;
-  } catch (cause) {
-    if (!controller.signal.aborted)
-      detailError.value = (cause as Error).message;
-  } finally {
-    if (detailController === controller) detailLoading.value = false;
+  async function get(id: string) {
+    const key = `${target.language}:${id}`;
+    const cached = detailCache.get(key);
+    if (cached) return cached;
+    const result = await lesson(target.language, id, controller.signal);
+    if (!controller.signal.aborted) detailCache.set(key, result);
+    return result;
+  }
+  if (target.kind === "lesson") {
+    detailLoading.value = true;
+    try {
+      const result = await get(target.ids[0]!);
+      if (!controller.signal.aborted) selected.value = result;
+    } catch (cause) {
+      if (!controller.signal.aborted)
+        detailError.value = (cause as Error).message;
+    } finally {
+      if (detailController === controller) detailLoading.value = false;
+    }
+  } else {
+    practiceLoading.value = true;
+    try {
+      // Practice normally uses loaded cards; refresh/Forward can rehydrate IDs.
+      const result: Lesson[] = [];
+      for (const id of target.ids) {
+        if (controller.signal.aborted) return;
+        result.push(
+          state.value.items.find((item) => item.id === id) || (await get(id)),
+        );
+      }
+      if (!controller.signal.aborted) practice.value = result;
+    } catch (cause) {
+      if (!controller.signal.aborted)
+        practiceError.value = (cause as Error).message;
+    } finally {
+      if (detailController === controller) practiceLoading.value = false;
+    }
   }
 }
-function back() {
-  detailController?.abort();
-  selected.value = null;
-  detailLoading.value = false;
-  detailError.value = "";
+function switchLanguage(value: Language) {
+  if (value !== language.value)
+    navigate({ kind: "dashboard", language: value }, true);
+}
+function open(item: Lesson) {
+  navigate({ kind: "lesson", language: item.language, ids: [item.id] });
 }
 function startPractice(items: Lesson[]) {
-  practice.value = items;
+  navigate({
+    kind: "practice",
+    language: language.value,
+    ids: items.map((item) => item.id),
+  });
 }
-onMounted(load);
+function retry() {
+  void restoreView(view.value);
+}
+defineExpose({ home });
 onUnmounted(() => {
   listController?.abort();
   detailController?.abort();
 });
 </script>
 <template>
-  <LessonPractice
-    v-if="practice"
-    :lessons="practice"
-    @back="practice = null"
-    @open="open"
-  />
-  <section v-else class="view" aria-label="Lesson library">
+  <KeepAlive :max="10">
+    <LessonPractice
+      v-if="view.kind === 'practice' && practice"
+      :key="entry.key"
+      :lessons="practice"
+      @back="back"
+      @open="open"
+    />
+  </KeepAlive>
+  <section v-if="view.kind === 'practice' && !practice" class="practice view">
+    <button class="text-button" @click="back">← Back</button>
+    <div v-if="practiceLoading" role="status" aria-label="Loading practice">
+      <span class="sr-only">Loading practice</span>
+      <div class="skeleton skeleton-heading" aria-hidden="true"></div>
+      <div class="skeleton reader-skeleton-body" aria-hidden="true"></div>
+    </div>
+    <div v-else-if="practiceError" class="error" role="alert">
+      <p>{{ practiceError }}</p>
+      <button class="secondary" @click="retry">Try again</button>
+    </div>
+  </section>
+  <section
+    v-if="view.kind !== 'practice'"
+    class="view"
+    aria-label="Lesson library"
+  >
     <div
-      v-if="!selected"
+      v-if="view.kind === 'dashboard'"
       class="language-switch"
       role="group"
       aria-label="Lesson language"
@@ -131,14 +196,14 @@ onUnmounted(() => {
         {{ languageName(value) }}
       </button>
     </div>
-    <div v-if="selected" class="reader-workspace">
+    <div v-if="view.kind === 'lesson'" class="reader-workspace">
       <aside class="lesson-sidebar" aria-label="Lessons on this page">
         <p class="eyebrow">{{ languageName(language) }} LESSONS</p>
         <button
           v-for="item in state.items"
           :key="item.id"
           class="sidebar-lesson"
-          :aria-current="selected.id === item.id ? 'true' : undefined"
+          :aria-current="selected?.id === item.id ? 'true' : undefined"
           @click="open(item)"
         >
           <strong :lang="language">{{
@@ -153,20 +218,23 @@ onUnmounted(() => {
           role="status"
           aria-label="Loading lesson detail"
         >
-          <button class="text-button" @click="back">← Back to library</button
-          ><span class="sr-only">Loading lesson detail</span>
+          <button class="text-button" @click="back">
+            {{ backLabel }}</button><span class="sr-only"
+            >Loading lesson detail</span
+          >
           <div class="skeleton skeleton-heading" aria-hidden="true"></div>
           <div class="skeleton skeleton-subtitle" aria-hidden="true"></div>
           <div class="skeleton reader-skeleton-body" aria-hidden="true"></div>
         </div>
         <div v-else-if="detailError" class="error" role="alert">
-          <button class="text-button" @click="back">← Back to library</button>
+          <button class="text-button" @click="back">{{ backLabel }}</button>
           <p>{{ detailError }}</p>
-          <button class="secondary" @click="open(selected)">Try again</button>
+          <button class="secondary" @click="retry">Try again</button>
         </div>
         <LessonReader
-          v-else
+          v-else-if="selected"
           :lesson="selected"
+          :back-label="backLabel"
           @back="back"
           @practice="startPractice([selected])"
         />
@@ -177,7 +245,7 @@ onUnmounted(() => {
         YOUR DAILY DOSE / {{ languageName(language) }}
       </p>
       <div class="section-heading">
-        <h1>A little language,<br />every day.</h1>
+        <h1 tabindex="-1">A little language,<br />every day.</h1>
         <button
           v-if="canPractice"
           class="secondary"

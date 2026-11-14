@@ -146,3 +146,26 @@ extra detail fan-out. Invalid language/offset/ID returns 400, signed-out access
 401, absent/unready detail 404, and provider/configuration failures a sanitized
 503. Detail IDs must use letters, digits, underscores or hyphens (max 200).
 No upstream provenance, credentials or arbitrary image hosts are exposed.
+
+## System Back navigation
+
+The dashboard is the root of the app's browser history. Opening a lesson or
+practice adds a view entry; system Back, browser Back/Forward, and the on-screen
+Back buttons restore the previous view. Language changes, section chips, retries,
+and practice reveals do not add Back steps. The logo returns to the existing
+dashboard entry instead of adding another root page.
+
+Navigation entries store only language, lesson IDs, view type and scroll position,
+not lesson text or credentials. Reloading a lesson/practice restores it through
+Flask's authenticated read endpoints. Practice position remains available when
+returning during the current session; it is not persisted across reloads.
+
+At the dashboard no Back handler blocks navigation or adds a dummy history entry.
+The browser/Android controls leaving the page or installed PWA; this web app does
+not attempt to force-close a browser window. Hardware Back exit on an installed
+Android PWA still needs a device check; browser history behavior is automated.
+
+Run the offline browser navigation checks with `cd frontend && npm run test:navigation`.
+Install the test browser once with `npx playwright install chromium`. All login
+and lesson API responses in this suite are fixtures; no provider credentials
+are used.

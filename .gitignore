@@ -17,3 +17,7 @@ service-account*.json
 backend/deploy.env.yaml
 .firebase/
 firebase-debug*.log
+
+# Browser regression artifacts
+frontend/test-results/
+frontend/playwright-report/

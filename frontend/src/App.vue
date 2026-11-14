@@ -6,6 +6,11 @@ import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
 import ReleaseBanner from "./components/ReleaseBanner.vue";
 import { ripple } from "./services/ripple";
+const library = ref<InstanceType<typeof LessonLibrary> | null>(null);
+function goHome() {
+  if (library.value) library.value.home();
+  else window.location.replace("/");
+}
 const bento = ref<HTMLDetailsElement | null>(null);
 const nextAppearance = computed(() =>
   appearance.value === "system" ? "light" : appearance.value === "light" ? "dark" : "system",
@@ -54,7 +59,7 @@ async function signOut() {
 <template>
   <main>
     <header class="app-header">
-      <a class="brand" href="/" aria-label="LinguaLoop home">
+      <a class="brand" href="/" aria-label="LinguaLoop home" @click.exact.prevent="goHome">
         <img class="brand-icon" src="/lingualoop-logo.png" alt="" width="44" height="44" />
         <span>LinguaLoop</span>
       </a>
@@ -115,7 +120,7 @@ async function signOut() {
       <p>{{ error }}</p>
       <button class="secondary" @click="session">Try again</button>
     </div>
-    <LessonLibrary v-else-if="user" />
+    <LessonLibrary v-else-if="user" ref="library" />
     <section v-else class="welcome view">
       <p class="eyebrow">MAKE A LITTLE ROOM FOR LANGUAGES</p>
       <h1>Keep your language<br />learning in motion.</h1>

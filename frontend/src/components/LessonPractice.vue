@@ -36,7 +36,9 @@ function move(delta: number) {
       ></progress>
       <div class="focus-card">
         <p class="eyebrow">ONE EXPRESSION</p>
-        <h1 :lang="current.lesson.language">{{ current.expression.text }}</h1>
+        <h1 tabindex="-1" :lang="current.lesson.language">
+          {{ current.expression.text }}
+        </h1>
         <p v-if="current.expression.reading" lang="ja">
           {{ current.expression.reading }}
         </p>

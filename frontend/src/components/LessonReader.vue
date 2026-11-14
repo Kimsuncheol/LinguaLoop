@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { type Lesson, languageName, lessonDate } from "../services/lessons";
-const props = defineProps<{ lesson: Lesson }>();
+const props = defineProps<{ lesson: Lesson; backLabel?: string }>();
 defineEmits<{ practice: []; back: [] }>();
 const tab = ref("Expressions");
 const tabs = computed(() =>
@@ -88,12 +88,12 @@ function navigate(event: KeyboardEvent) {
 <template>
   <article class="reader-content" aria-label="Lesson detail">
     <button class="text-button" @click="$emit('back')">
-      ← Back to library
+      {{ backLabel || "← Back to library" }}
     </button>
     <p class="eyebrow">
       {{ languageName(lesson.language) }} · {{ lessonDate(lesson.date) }}
     </p>
-    <h1 :lang="lesson.language">
+    <h1 tabindex="-1" :lang="lesson.language">
       {{ lesson.expression || lesson.title || "Lesson text unavailable" }}
     </h1>
     <p v-if="lesson.reading" class="reading" lang="ja">{{ lesson.reading }}</p>
