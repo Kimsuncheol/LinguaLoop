@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { appearance, setAppearance } from "./services/appearance";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
 import ReleaseBanner from "./components/ReleaseBanner.vue";
 const bento = ref<HTMLDetailsElement | null>(null);
+const nextAppearance = computed(() =>
+  appearance.value === "system" ? "light" : appearance.value === "light" ? "dark" : "system",
+);
 function closeBento(event: Event) {
   if (bento.value && !bento.value.contains(event.target as Node)) {
     bento.value.open = false;
@@ -61,20 +64,41 @@ async function signOut() {
           </span>
         </summary>
         <div class="bento-panel">
-          <label class="appearance-control">
-            <span>Appearance</span>
-            <select :value="appearance" @change="setAppearance(($event.target as HTMLSelectElement).value)">
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </label>
-          <div v-if="user" class="account">
-            <span>{{ user.name }}</span
-            ><button class="text-button" :disabled="signingOut" @click="signOut">
+          <div class="appearance-control">
+            <div>
+              <span>Appearance</span>
+              <span class="appearance-mode" aria-live="polite">{{ appearance }}</span>
+            </div>
+            <button
+              class="appearance-toggle"
+              :aria-label="`Appearance: ${appearance}. Switch to ${nextAppearance}`"
+              :title="`Switch to ${nextAppearance} appearance`"
+              @click="setAppearance(nextAppearance)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <g v-if="appearance === 'system'">
+                  <rect x="3" y="4" width="18" height="13" rx="1" />
+                  <path d="M8 21h8M12 17v4" />
+                </g>
+                <g v-else-if="appearance === 'light'">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+                </g>
+                <path v-else d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z" />
+              </svg>
+            </button>
+          </div>
+          <div v-if="loading" class="menu-account-loading" role="status" aria-label="Loading account">
+            <span class="skeleton" aria-hidden="true"></span>
+          </div>
+          <div v-else-if="user" class="menu-account">
+            <span class="menu-account-name">{{ user.name }}</span>
+            <button class="menu-account-action" :disabled="signingOut" @click="signOut">
               {{ signingOut ? "Signing out…" : "Sign out" }}
             </button>
           </div>
+          <button v-else-if="error" class="menu-account-action" @click="session">Retry account</button>
+          <a v-else class="menu-account-action" href="/api/auth/kakao/login">Sign in with KakaoTalk ↗</a>
         </div>
       </details>
     </header>
