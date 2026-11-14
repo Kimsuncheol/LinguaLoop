@@ -63,3 +63,18 @@ footer { display:flex; justify-content:space-between; gap:20px; padding:26px 0; 
 @media(min-width:1500px) { main { padding-top:20px; } }
 @media(max-width:900px) { .bento { grid-template-columns:repeat(2,minmax(0,1fr)); } .thought { grid-column:span 2; } blockquote br { display:none; } .thought blockquote { margin:15px 0; } .appearance { grid-column:span 2; } .mode-options label { flex-direction:row; justify-content:center; gap:10px; } }
 @media(max-width:540px) { main { padding:0 18px; } .topbar { min-height:80px; gap:12px; } .workspace-label { display:none; } .quiet-button { margin-left:auto; } .intro { padding:30px 0 24px; } .bento { grid-template-columns:minmax(0,1fr); gap:14px; } .hero,.thought,.appearance { grid-column:auto; } .card { padding:24px; border-radius:20px; } .hero { min-height:375px; } .hero h2 { font-size:44px; } .loop-art { right:-115px; opacity:.4; } .hero-note { display:block; } .resource { min-height:245px; } footer { flex-direction:column; gap:8px; } }
+
+/* Compact bento menu in the upper-right corner of the header. */
+.app-menu { position:relative; margin-left:auto; z-index:5; }
+.app-menu summary { list-style:none; display:grid; place-items:center; width:44px; height:44px; border-radius:12px; cursor:pointer; color:var(--text); }
+.app-menu summary::-webkit-details-marker { display:none; }
+.app-menu summary:hover,.app-menu[open] summary { background:var(--soft); }
+.app-menu summary:focus-visible { outline:3px solid var(--text); outline-offset:3px; }
+.bento-icon { display:grid; grid-template-columns:repeat(3,4px); gap:4px; }
+.bento-icon>span { width:4px; height:4px; background:currentColor; border-radius:50%; }
+.menu-panel { position:absolute; right:0; top:54px; width:min(290px,calc(100vw - 36px)); padding:20px; border:1px solid var(--line); border-radius:16px; background:var(--card); box-shadow:0 12px 35px #00000018; }
+.menu-heading { font-weight:650; margin:0; font-size:14px; }
+.menu-panel fieldset { margin-top:18px; }
+.menu-panel .quiet-button { margin:18px 0 0; width:100%; }
+.learning-home { min-height:300px; padding:35px 0; }
+footer { border-top:1px solid var(--line); }
