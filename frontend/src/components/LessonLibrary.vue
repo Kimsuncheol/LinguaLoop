@@ -112,7 +112,12 @@ onUnmounted(() => {
     @open="open"
   />
   <section v-else class="view" aria-label="Lesson library">
-    <div class="language-switch" role="group" aria-label="Lesson language">
+    <div
+      v-if="!selected"
+      class="language-switch"
+      role="group"
+      aria-label="Lesson language"
+    >
       <button
         v-for="value in ['en', 'ja'] as const"
         :key="value"
@@ -136,8 +141,7 @@ onUnmounted(() => {
         >
           <strong :lang="language">{{
             item.expression || item.title || "Lesson"
-          }}</strong
-          ><span>{{ lessonDate(item.date) }}</span>
+          }}</strong><span>{{ lessonDate(item.date) }}</span>
         </button>
       </aside>
       <div>
