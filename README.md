@@ -160,10 +160,14 @@ not lesson text or credentials. Reloading a lesson/practice restores it through
 Flask's authenticated read endpoints. Practice position remains available when
 returning during the current session; it is not persisted across reloads.
 
-At the dashboard no Back handler blocks navigation or adds a dummy history entry.
-The browser/Android controls leaving the page or installed PWA; this web app does
-not attempt to force-close a browser window. Hardware Back exit on an installed
-Android PWA still needs a device check; browser history behavior is automated.
+Back from the dashboard opens a themed “Leave LinguaLoop?” confirmation.
+Stay (also Escape/cancel) keeps the dashboard open. A single history boundary is
+reused, so dismissing the confirmation does not accumulate extra Back steps.
+Leave returns to the previous page when available. On a fresh installed launch,
+the app requests window closure; if the browser blocks it, the confirmation is
+disarmed and an accessible status asks for one more native Back press to exit.
+Browser/Android owns the final window close. Installed Android hardware Back
+still needs a device check; confirmation and history behavior are automated.
 
 Run the offline browser navigation checks with `cd frontend && npm run test:navigation`.
 Install the test browser once with `npx playwright install chromium`. All login

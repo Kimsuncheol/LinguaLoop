@@ -10,6 +10,7 @@ import {
   newestLessonFirst,
 } from "../services/lessons";
 import { useLibraryNavigation, type LibraryView } from "../services/navigation";
+import ExitConfirmation from "./ExitConfirmation.vue";
 import LoadingSkeleton from "./LoadingSkeleton.vue";
 import LessonReader from "./LessonReader.vue";
 import LessonPractice from "./LessonPractice.vue";
@@ -64,7 +65,18 @@ async function load() {
 const detailCache = new Map<string, Lesson>();
 const practiceLoading = ref(false),
   practiceError = ref("");
-const { entry, view, navigate, back, home } = useLibraryNavigation(restoreView);
+const {
+  entry,
+  view,
+  navigate,
+  back,
+  home,
+  exitRequested,
+  exitReady,
+  exitHint,
+  stay,
+  leave,
+} = useLibraryNavigation(restoreView);
 const backLabel = computed(() =>
   entry.value.parent === "practice"
     ? "← Back to practice"
@@ -153,6 +165,15 @@ onUnmounted(() => {
 });
 </script>
 <template>
+  <ExitConfirmation
+    :open="exitRequested"
+    :ready="exitReady"
+    @stay="stay"
+    @leave="leave"
+  />
+  <p v-if="exitHint" class="hint" role="status">
+    Press Back once more to leave the app.
+  </p>
   <KeepAlive :max="10">
     <LessonPractice
       v-if="view.kind === 'practice' && practice"

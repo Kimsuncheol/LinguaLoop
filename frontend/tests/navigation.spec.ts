@@ -206,6 +206,25 @@ test("language changes and Home do not trap Back at the dashboard", async ({
     .poll(() => page.evaluate(() => window.scrollY))
     .toBe(dashboardScroll);
   await page.goBack();
+  const confirmation = page.getByRole("dialog", { name: "Leave LinguaLoop?" });
+  await expect(confirmation).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Stay", exact: true }),
+  ).toBeFocused();
+  const guardedLength = await page.evaluate(() => history.length);
+  await page.getByRole("button", { name: "Stay", exact: true }).click();
+  await expect(confirmation).not.toBeVisible();
+  await dashboard(page);
+  for (let i = 0; i < 2; i++) {
+    await page.goBack();
+    await expect(confirmation).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(confirmation).not.toBeVisible();
+  }
+  expect(await page.evaluate(() => history.length)).toBe(guardedLength);
+  await page.goBack();
+  await expect(confirmation).toBeVisible();
+  await page.getByRole("button", { name: "Leave", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Outside the app" }),
   ).toBeVisible();
@@ -240,4 +259,53 @@ test("Back after signing out never restores authenticated lesson content", async
   await expect(
     page.getByRole("link", { name: "Continue with KakaoTalk →", exact: true }),
   ).toBeVisible();
+});
+
+test("fresh dashboard asks before leaving and disarms for native Back if closing is unavailable", async ({
+  page,
+}) => {
+  await fixture(page);
+  // Model an installed launch with no prior document; a test tab may otherwise
+  // include about:blank as a real previous page.
+  await page.addInitScript(() => {
+    if (!history.state?.lingualoop)
+      history.replaceState(
+        {
+          lingualoop: {
+            version: 1,
+            key: "installed-root",
+            depth: 0,
+            parent: null,
+            view: { kind: "dashboard", language: "en" },
+            scroll: 0,
+            exitGuard: { id: "installed-exit", previous: false },
+            exitBoundary: true,
+          },
+        },
+        "",
+      );
+  });
+  await page.goto("/");
+  await dashboard(page);
+  const length = await page.evaluate(() => history.length);
+  await page.reload();
+  await dashboard(page);
+  expect(await page.evaluate(() => history.length)).toBe(length);
+  await page.goBack();
+  const confirmation = page.getByRole("dialog", { name: "Leave LinguaLoop?" });
+  await expect(confirmation).toBeVisible();
+  await page.getByRole("button", { name: "Leave", exact: true }).click();
+  await expect(confirmation).not.toBeVisible();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Press Back once more" }),
+  ).toContainText("Press Back once more to leave");
+  expect(await page.evaluate(() => history.state.lingualoop.exitBoundary)).toBe(
+    true,
+  );
+  await page.locator(".lesson-card").first().click();
+  await detail(page);
+  await page.goBack();
+  await dashboard(page);
+  await page.goBack();
+  await expect(confirmation).toBeVisible();
 });

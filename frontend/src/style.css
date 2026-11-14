@@ -661,3 +661,10 @@ progress {
   .section-chips::-webkit-scrollbar { display: none; }
   .section-chips a { flex-shrink: 0; }
 }
+
+:root { --dialog-backdrop: #00000066; }
+.exit-dialog { width: 360px; max-width: calc(100vw - 48px); padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); }
+.exit-dialog::backdrop { background: var(--dialog-backdrop); }
+.exit-dialog h2 { margin: 0 0 12px; font-size: 24px; }
+.exit-dialog p { color: var(--muted); line-height: 1.7; }
+.exit-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 24px; }

@@ -1,9 +1,20 @@
-import { computed, nextTick, onMounted, onUnmounted, shallowRef } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+} from "vue";
 import type { Language } from "./lessons";
 
 export type LibraryView =
   | { kind: "dashboard"; language: Language }
   | { kind: "lesson" | "practice"; language: Language; ids: string[] };
+interface ExitGuard {
+  id: string;
+  previous: boolean;
+}
 interface Entry {
   version: 1;
   key: string;
@@ -11,6 +22,8 @@ interface Entry {
   parent: LibraryView["kind"] | null;
   view: LibraryView;
   scroll: number;
+  exitGuard?: ExitGuard;
+  exitBoundary?: boolean;
 }
 function savedEntry(value: unknown): Entry | null {
   if (!value || typeof value !== "object") return null;
@@ -22,6 +35,12 @@ function savedEntry(value: unknown): Entry | null {
     e.depth < 0 ||
     !Number.isFinite(e.scroll) ||
     e.scroll < 0
+  )
+    return null;
+  if (
+    e.exitGuard &&
+    (typeof e.exitGuard.id !== "string" ||
+      typeof e.exitGuard.previous !== "boolean")
   )
     return null;
   const v = e.view;
@@ -47,6 +66,12 @@ function savedEntry(value: unknown): Entry | null {
 export function useLibraryNavigation(
   render: (view: LibraryView) => Promise<void>,
 ) {
+  let guard = savedEntry(window.history.state?.lingualoop)?.exitGuard;
+  const exitRequested = ref(false),
+    exitReady = ref(true),
+    exitHint = ref(false);
+  let leaving = false;
+  let exitTimer: ReturnType<typeof setTimeout> | undefined;
   const create = (
     view: LibraryView,
     depth = 0,
@@ -58,6 +83,7 @@ export function useLibraryNavigation(
     parent,
     view,
     scroll: 0,
+    exitGuard: guard,
   });
   const entry = shallowRef(
     savedEntry(window.history.state?.lingualoop) ||
@@ -73,6 +99,56 @@ export function useLibraryNavigation(
       { ...window.history.state, lingualoop: value },
       "",
     );
+  }
+  function armExit(value: Entry) {
+    guard ||= { id: crypto.randomUUID(), previous: window.history.length > 1 };
+    // One boundary below the dashboard lets hardware Back ask before leaving.
+    // Stay traverses Forward to the existing root instead of pushing duplicates.
+    write({ ...value, exitGuard: guard, exitBoundary: true });
+    const root = {
+      ...value,
+      key: crypto.randomUUID(),
+      exitGuard: guard,
+      exitBoundary: false,
+    };
+    write(root, true);
+    leaving = false;
+    exitHint.value = false;
+    return root;
+  }
+  function stay() {
+    exitRequested.value = false;
+  }
+  function leave() {
+    if (!exitRequested.value || !exitReady.value) return;
+    exitRequested.value = false;
+    leaving = true;
+    const key = entry.value.key;
+    if (guard?.previous) {
+      // Skip the dashboard's confirmation boundary and reach the previous page.
+      window.history.go(-2);
+      exitTimer = setTimeout(() => {
+        if (
+          active &&
+          leaving &&
+          window.history.state?.lingualoop?.key === key
+        ) {
+          exitHint.value = true;
+          window.history.back();
+        }
+      }, 400);
+    } else {
+      if (
+        window.matchMedia(
+          "(display-mode: standalone), (display-mode: fullscreen)",
+        ).matches
+      )
+        window.close();
+      // Some hosts prohibit script-closing. Disarm the boundary so the next
+      // hardware Back is native, and explain that fallback instead of trapping.
+      exitHint.value = true;
+      window.history.back();
+    }
   }
   function saveScroll() {
     if (
@@ -104,6 +180,8 @@ export function useLibraryNavigation(
   }
   function navigate(view: LibraryView, replace = false) {
     if (JSON.stringify(view) === JSON.stringify(entry.value.view)) return;
+    if (entry.value.exitBoundary) entry.value = armExit(entry.value);
+    exitHint.value = false;
     saveScroll();
     const next = create(
       view,
@@ -119,17 +197,36 @@ export function useLibraryNavigation(
     window.history.back();
   }
   function home() {
+    if (entry.value.exitBoundary) entry.value = armExit(entry.value);
     if (!entry.value.depth) return;
     saveScroll();
     window.history.go(-entry.value.depth);
   }
   function pop(event: PopStateEvent) {
-    // Never push a replacement entry on Back: at the dashboard the OS/browser
-    // remains free to leave the app, instead of trapping the user in a loop.
-    void apply(
-      savedEntry(event.state?.lingualoop) ||
-        create({ kind: "dashboard", language: entry.value.view.language }),
-    );
+    let next = savedEntry(event.state?.lingualoop);
+    if (next?.exitBoundary && next.exitGuard?.id === guard?.id) {
+      if (leaving) {
+        entry.value = {
+          ...next,
+          view: entry.value.view,
+          scroll: entry.value.scroll,
+        };
+        write(entry.value);
+        return;
+      }
+      exitRequested.value = !exitRequested.value;
+      exitReady.value = false;
+      window.history.forward();
+      return;
+    }
+    exitReady.value = true;
+    leaving = false;
+    exitHint.value = false;
+    clearTimeout(exitTimer);
+    next ||= create({ kind: "dashboard", language: entry.value.view.language });
+    guard = next.exitGuard || guard;
+    if (next.view.kind === "dashboard" && !next.exitGuard) next = armExit(next);
+    void apply(next);
   }
   function scroll() {
     clearTimeout(timer);
@@ -139,7 +236,12 @@ export function useLibraryNavigation(
     active = true;
     previousScrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = "manual";
-    write(entry.value);
+    if (
+      entry.value.view.kind === "dashboard" &&
+      (!entry.value.exitGuard || entry.value.exitBoundary)
+    ) {
+      entry.value = armExit(entry.value);
+    } else write(entry.value);
     window.addEventListener("popstate", pop);
     window.addEventListener("scroll", scroll, { passive: true });
     void apply(entry.value);
@@ -148,6 +250,7 @@ export function useLibraryNavigation(
     active = false;
     revision++;
     clearTimeout(timer);
+    clearTimeout(exitTimer);
     window.removeEventListener("popstate", pop);
     window.removeEventListener("scroll", scroll);
     window.history.scrollRestoration = previousScrollRestoration;
@@ -158,5 +261,10 @@ export function useLibraryNavigation(
     navigate,
     back,
     home,
+    exitRequested,
+    exitReady,
+    exitHint,
+    stay,
+    leave,
   };
 }
