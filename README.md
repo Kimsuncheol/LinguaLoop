@@ -116,7 +116,9 @@ with missing/invalid dates last and stable ID ordering for equal dates.
 
 ## English, Japanese, and Chinese library
 
-The signed-in library has independent English, Japanese, and Chinese tabs, a desktop
+The signed-in dashboard links to English, Japanese, and Chinese expression lists through
+a two-column grid of rounded-square language cards. Each list has lesson cards, practice,
+and a back-to-top button. The library also has a desktop
 reader with a lesson sidebar, and a mobile expression practice view. Japanese
 lessons preserve supplied readings, Korean meanings, examples, glossary and
 notes; Chinese lessons preserve simplified/traditional expressions, pinyin and
@@ -155,9 +157,9 @@ No upstream provenance, credentials or arbitrary image hosts are exposed.
 
 ## System Back navigation
 
-The dashboard is the root of the app's browser history. Opening a lesson or
+The dashboard is the root of the app's browser history. Opening an expression list, lesson or
 practice adds a view entry; system Back, browser Back/Forward, and the on-screen
-Back buttons restore the previous view. Language changes, section chips, retries,
+Back buttons restore the previous view. Section chips, retries,
 and practice reveals do not add Back steps. The logo returns to the existing
 dashboard entry instead of adding another root page.
 

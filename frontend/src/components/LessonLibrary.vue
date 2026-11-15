@@ -98,7 +98,8 @@ async function restoreView(target: LibraryView) {
   selected.value = null;
   practice.value = null;
   language.value = target.language;
-  if (target.kind === "dashboard") {
+  if (target.kind === "dashboard") return;
+  if (target.kind === "expressions") {
     if (!state.value.loaded) await load();
     return;
   }
@@ -143,9 +144,8 @@ async function restoreView(target: LibraryView) {
     }
   }
 }
-function switchLanguage(value: Language) {
-  if (value !== language.value)
-    navigate({ kind: "dashboard", language: value }, true);
+function openExpressions(value: Language) {
+  navigate({ kind: "expressions", language: value });
 }
 function open(item: Lesson) {
   navigate({ kind: "lesson", language: item.language, ids: [item.id] });
@@ -169,12 +169,12 @@ watch(
     loadMoreObserver = undefined;
     if (
       !loadMoreTarget.value || loading.value || error.value ||
-      view.value.kind !== "dashboard" || state.value.next === null ||
+      view.value.kind !== "expressions" || state.value.next === null ||
       !state.value.loaded || !state.value.items.length ||
       typeof IntersectionObserver === "undefined"
     ) return;
     const observer = new IntersectionObserver((entries) => {
-      if (loadMoreObserver === observer && entries.some((entry) => entry.isIntersecting) && !error.value && view.value.kind === "dashboard")
+      if (loadMoreObserver === observer && entries.some((entry) => entry.isIntersecting) && !error.value && view.value.kind === "expressions")
         void load();
     }, { rootMargin: "0px 0px 240px 0px" });
     loadMoreObserver = observer;
@@ -190,7 +190,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <BackToTop v-if="view.kind === 'dashboard'" />
+  <BackToTop v-if="view.kind === 'expressions'" />
   <ExitConfirmation
     :open="exitRequested"
     :ready="exitReady"
@@ -226,23 +226,23 @@ onUnmounted(() => {
     class="view"
     aria-label="Lesson library"
   >
-    <div
-      v-if="view.kind === 'dashboard'"
-      class="language-switch"
-      role="group"
-      aria-label="Lesson language"
-    >
-      <button
-        v-for="value in ['en', 'ja', 'zh'] as const"
-        :key="value"
-        class="secondary"
-        :class="{ chosen: language === value }"
-        :aria-pressed="language === value"
-        @click="switchLanguage(value)"
-      >
-        {{ languageName(value) }}
-      </button>
-    </div>
+    <template v-if="view.kind === 'dashboard'">
+      <p class="eyebrow">YOUR DAILY DOSE</p>
+      <h1 tabindex="-1">A little language,<br />every day.</h1>
+      <p class="muted">Choose a language to explore its expressions.</p>
+      <nav class="language-grid" aria-label="Expression lists by language">
+        <button
+          v-for="value in ['en', 'ja', 'zh'] as const"
+          :key="value"
+          class="language-card"
+          :aria-label="languageName(value)"
+          @click="openExpressions(value)"
+        >
+          <span class="language-icon" :lang="value" aria-hidden="true">{{ { en: 'Aa', ja: 'あ', zh: '文' }[value] }}</span>
+          <span class="language-card-name">{{ languageName(value) }}</span>
+        </button>
+      </nav>
+    </template>
     <div v-if="view.kind === 'lesson'" class="reader-workspace">
       <aside class="lesson-sidebar" aria-label="Lessons on this page">
         <p class="eyebrow">{{ languageName(language) }} LESSONS</p>
@@ -282,12 +282,13 @@ onUnmounted(() => {
         />
       </div>
     </div>
-    <template v-else>
+    <template v-else-if="view.kind === 'expressions'">
+      <button class="text-button" @click="back">← All languages</button>
       <p class="eyebrow library-eyebrow">
         YOUR DAILY DOSE / {{ languageName(language) }}
       </p>
       <div class="section-heading">
-        <h1 tabindex="-1">A little language,<br />every day.</h1>
+        <h1 tabindex="-1">{{ languageName(language) }} expressions</h1>
         <button
           v-if="canPractice"
           class="secondary"

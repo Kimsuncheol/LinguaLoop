@@ -10,6 +10,7 @@ import type { Language } from "./lessons";
 
 export type LibraryView =
   | { kind: "dashboard"; language: Language }
+  | { kind: "expressions"; language: Language }
   | { kind: "lesson" | "practice"; language: Language; ids: string[] };
 interface ExitGuard {
   id: string;
@@ -46,6 +47,7 @@ function savedEntry(value: unknown): Entry | null {
   const v = e.view;
   if (!v || !["en", "ja", "zh"].includes(v.language)) return null;
   if (v.kind === "dashboard") return e.depth === 0 ? e : null;
+  if (v.kind === "expressions") return e.depth > 0 ? e : null;
   if (
     !["lesson", "practice"].includes(v.kind) ||
     e.depth === 0 ||

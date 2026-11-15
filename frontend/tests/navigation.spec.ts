@@ -78,9 +78,10 @@ const practice = (page: Page) =>
   ).toBeVisible();
 
 // All data and authentication are fixture responses; tests never contact providers.
-test("dashboard bottom-right button returns to top and stays out of lesson views", async ({ page }) => {
+test("expression list bottom-right button returns to top and stays out of lesson views", async ({ page }) => {
   await fixture(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   const button = page.getByRole("button", { name: "Back to top", exact: true });
   await expect(button).toHaveCount(0);
@@ -112,7 +113,7 @@ test("dashboard bottom-right button returns to top and stays out of lesson views
   await expect(button).toHaveCount(0);
 });
 
-test("dashboard scroll loads both languages and pauses on pagination errors", async ({ page }) => {
+test("expression list scroll loads both languages and pauses on pagination errors", async ({ page }) => {
   await fixture(page);
   const requests: string[] = [];
   let fail = true;
@@ -133,6 +134,7 @@ test("dashboard scroll loads both languages and pauses on pagination errors", as
     } });
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(6);
   expect(requests).toEqual(["en:0"]);
   await page.locator(".load-more").scrollIntoViewIfNeeded();
@@ -147,6 +149,7 @@ test("dashboard scroll loads both languages and pauses on pagination errors", as
   await page.getByRole("button", { name: "Try again", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(12);
   await expect(page.locator(".load-more")).toHaveCount(0);
+  await page.getByRole("button", { name: "← All languages", exact: true }).click();
   await page.getByRole("button", { name: "Japanese", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(6);
   await page.locator(".load-more").scrollIntoViewIfNeeded();
@@ -158,6 +161,7 @@ test("dashboard scroll loads both languages and pauses on pagination errors", as
 test("focused navigation headings have no frame in light and dark themes", async ({ page }) => {
   await fixture(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
@@ -185,6 +189,7 @@ test("Back and Forward restore nested lessons, practice position and dashboard",
 }) => {
   await fixture(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   await page.locator(".lesson-card").first().click();
   await detail(page);
@@ -235,6 +240,7 @@ test("reload and practice rehydration preserve Back steps without storing lesson
 }) => {
   await fixture(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   await page.locator(".lesson-card").first().click();
   await detail(page);
@@ -262,6 +268,7 @@ test("Back cancels loading and retries do not create extra entries", async ({
 }) => {
   const control = await fixture(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   control.failed = true;
   await page.locator(".lesson-card").nth(1).click();
@@ -283,58 +290,53 @@ test("Back cancels loading and retries do not create extra entries", async ({
   await expect(page.locator(".reader-content")).toHaveCount(0);
 });
 
-test("language changes and Home do not trap Back at the dashboard", async ({
-  page,
-}) => {
+test("language cards open separate lists and Home returns to the guarded dashboard", async ({ page }) => {
   await fixture(page);
   await page.goto("/back-sentinel");
   await page.goto("/");
-  await dashboard(page);
-  const length = await page.evaluate(() => history.length);
+  const cards = page.locator(".language-card");
+  await expect(cards).toHaveCount(3);
+  await expect(page.locator(".language-switch, .lesson-card")).toHaveCount(0);
+  const boxes = await cards.evaluateAll(nodes => nodes.map(node => {
+    const { x, y, width, height } = node.getBoundingClientRect();
+    return { x, y, width, height };
+  }));
+  expect(boxes[0]!.y).toBe(boxes[1]!.y);
+  expect(boxes[0]!.x).toBe(boxes[2]!.x);
+  expect(boxes[2]!.y).toBeGreaterThan(boxes[0]!.y);
+  for (const box of boxes) expect(Math.abs(box.width - box.height)).toBeLessThan(1);
   for (const name of ["Japanese", "Chinese", "English"]) {
     await page.getByRole("button", { name, exact: true }).click();
     await dashboard(page);
+    await expect(page.getByRole("heading", { name: `${name} expressions`, exact: true })).toBeVisible();
+    await page.reload();
+    await dashboard(page);
+    await page.goBack();
+    await expect(cards).toHaveCount(3);
   }
-  expect(await page.evaluate(() => history.length)).toBe(length);
-  await page.evaluate(() => window.scrollTo(0, 400));
-  const dashboardScroll = await page.evaluate(() => window.scrollY);
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await page.locator(".lesson-card").first().click();
   await detail(page);
-  await page
-    .getByRole("button", { name: "Practice this lesson →", exact: true })
-    .click();
-  await practice(page);
-  await page
-    .getByRole("link", { name: "LinguaLoop home", exact: true })
-    .click();
-  await dashboard(page);
+  await page.getByRole("link", { name: "LinguaLoop home", exact: true }).click();
+  await expect(cards).toHaveCount(3);
   expect(await page.evaluate(() => history.state.lingualoop.depth)).toBe(0);
-  await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBe(dashboardScroll);
   await page.goBack();
   const confirmation = page.getByRole("dialog", { name: "Leave LinguaLoop?" });
   await expect(confirmation).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Stay", exact: true }),
-  ).toBeFocused();
-  const guardedLength = await page.evaluate(() => history.length);
+  await expect(page.getByRole("button", { name: "Stay", exact: true })).toBeFocused();
+  const length = await page.evaluate(() => history.length);
   await page.getByRole("button", { name: "Stay", exact: true }).click();
-  await expect(confirmation).not.toBeVisible();
-  await dashboard(page);
   for (let i = 0; i < 2; i++) {
     await page.goBack();
     await expect(confirmation).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(confirmation).not.toBeVisible();
   }
-  expect(await page.evaluate(() => history.length)).toBe(guardedLength);
+  expect(await page.evaluate(() => history.length)).toBe(length);
   await page.goBack();
   await expect(confirmation).toBeVisible();
   await page.getByRole("button", { name: "Leave", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Outside the app" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Outside the app" })).toBeVisible();
 });
 
 test("Back after signing out never restores authenticated lesson content", async ({
@@ -345,6 +347,7 @@ test("Back after signing out never restores authenticated lesson content", async
     route.fulfill({ status: 204 }),
   );
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await dashboard(page);
   await page.locator(".lesson-card").first().click();
   await detail(page);
@@ -393,10 +396,10 @@ test("fresh dashboard asks before leaving and disarms for native Back if closing
       );
   });
   await page.goto("/");
-  await dashboard(page);
+  await expect(page.locator(".language-card")).toHaveCount(3);
   const length = await page.evaluate(() => history.length);
   await page.reload();
-  await dashboard(page);
+  await expect(page.locator(".language-card")).toHaveCount(3);
   expect(await page.evaluate(() => history.length)).toBe(length);
   await page.goBack();
   const confirmation = page.getByRole("dialog", { name: "Leave LinguaLoop?" });
@@ -409,10 +412,13 @@ test("fresh dashboard asks before leaving and disarms for native Back if closing
   expect(await page.evaluate(() => history.state.lingualoop.exitBoundary)).toBe(
     true,
   );
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await page.locator(".lesson-card").first().click();
   await detail(page);
   await page.goBack();
   await dashboard(page);
+  await page.goBack();
+  await expect(page.locator(".language-card")).toHaveCount(3);
   await page.goBack();
   await expect(confirmation).toBeVisible();
 });

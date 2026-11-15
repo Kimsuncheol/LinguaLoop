@@ -643,8 +643,38 @@ progress {
   .app-header { flex-wrap: wrap; padding: 18px 0; gap: 12px; }
 }
 
-.language-switch { display: flex; gap: 8px; flex-wrap: wrap; }
-.language-switch .chosen { background: var(--feature-bg); color: var(--on-feature); }
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 3vw, 24px);
+  max-width: 640px;
+  margin: 32px 0;
+}
+.language-card {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.language-card:hover { background: var(--surface-soft); }
+.language-icon {
+  display: grid;
+  place-items: center;
+  width: clamp(54px, 12vw, 80px);
+  height: clamp(54px, 12vw, 80px);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-size: clamp(28px, 6vw, 40px);
+  font-weight: 650;
+}
+.language-card-name { font-size: clamp(17px, 3vw, 24px); font-weight: 650; }
 .library-eyebrow { margin-top: 36px; }
 .reader-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; margin-top: 0; align-items: start; }
 .lesson-sidebar { background: var(--surface-soft); padding: 20px; border-radius: 20px; max-height: 75vh; overflow: auto; position: sticky; top: 24px; }

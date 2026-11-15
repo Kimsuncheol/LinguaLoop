@@ -36,6 +36,7 @@ async function fixture(
     }),
   );
   await page.goto("/");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await page.locator(".lesson-card").first().click();
   await expect(page.locator(".reader-content")).toBeVisible();
 }
