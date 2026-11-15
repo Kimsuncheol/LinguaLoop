@@ -5,7 +5,34 @@ import {
   expressionParts,
   dialogueTurns,
   dialogueMessages,
+  dialogueSentences,
 } from "../src/services/lessonText.ts";
+
+test("sentence pairs handle OCR punctuation and English titles", () => {
+  assert.deepEqual(dialogueSentences("See Dr. Kim. Are you ready?", "en"), ["See Dr. Kim.", "Are you ready?"]);
+  const result = dialogueMessages("A It really was. I feel recharged. I'd do it again.", "A 정말 그랬어.재충전된 기분이야.또 하고 싶다.");
+  assert.deepEqual(result.messages[0]!.sentences, [
+    { text: "It really was.", translation: "정말 그랬어." },
+    { text: "I feel recharged.", translation: "재충전된 기분이야." },
+    { text: "I'd do it again.", translation: "또 하고 싶다." },
+  ]);
+});
+
+test("a missing OCR label is recovered only with matching sentence and speaker boundaries", () => {
+  const english = "A The trip was incredible. No\nphone service, just nature.\nSo you could relax, right? It sounds like the\nperfect escape.\nA It really was. I feel recharged. I'd go again.";
+  const korean = "A 여행은 최고였어.휴대폰도 안 터졌어.\nB 쉴 수 있었겠다,그치?완벽한 탈출같네.\nA 정말 그랬어.재충전된 기분이야.또 가고 싶다.";
+  const result = dialogueMessages(english, korean);
+  assert.deepEqual(result.messages.map((m) => m.speaker), ["A", "B", "A"]);
+  assert.equal(result.messages[1]!.sentences[0]!.text, "So you could relax, right?");
+  assert.equal(result.separateTranslation, null);
+  assert.equal(dialogueMessages(english, korean.replace("정말 그랬어.", "")).separateTranslation, korean.replace("정말 그랬어.", ""));
+  assert.equal(dialogueMessages(english, korean.replace("B 쉴", "A 쉴").replace("A 여행", "B 여행")).messages.length, 2);
+});
+
+test("unequal sentence counts retain the complete bilingual turn", () => {
+  const result = dialogueMessages("A Can you help? Call me at six.", "A 여섯 시에 전화해 줄 수 있어?");
+  assert.deepEqual(result.messages[0]!.sentences, [{ text: "Can you help? Call me at six.", translation: "여섯 시에 전화해 줄 수 있어?" }]);
+});
 
 test("meaning paragraphs preserve Korean explanations and quoted expressions", () => {
   const source =

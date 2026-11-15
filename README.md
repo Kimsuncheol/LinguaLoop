@@ -184,9 +184,11 @@ are used.
 
 Meaning explanations are separated into readable paragraphs without rewriting
 source wording. Dialogue recognizes explicit A/B labels: character A is left,
-character B is right. Korean translation is grouped with a turn only when both
-the number of turns and character sequence match; otherwise it remains below
-the conversation. Unlabelled or unsupported character formats retain the
+character B is right. Each matched English sentence shows its Korean translation
+directly below it. When sentence counts differ, the translation stays inside its
+matching turn. Missing OCR speaker labels are recovered only when bilingual
+sentence counts and all surviving speaker boundaries agree. Unmatched translations
+remain below the conversation. Unlabelled or unsupported character formats retain the
 original text rather than inventing speakers.
 
 The dialogue uses the requested [`vue-bubble-chat`](https://github.com/vadymsem/vue-bubble-chat)

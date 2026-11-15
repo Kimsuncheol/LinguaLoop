@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 async function fixture(
   page: Page,
   dialogue = "A Hello there.\nB Nice to see you.\nA Likewise.",
+  translation = "A 안녕하세요.\nB 만나서 반가워요.\nA 저도요.",
 ) {
   const lesson = {
     id: "formatted",
@@ -14,7 +15,7 @@ async function fixture(
     explanation:
       "첫 문장이다.두 번째 문장 Nice to see you이다.\n\n참고로 다른 표현도 있다.",
     dialogue,
-    translation: "A 안녕하세요.\nB 만나서 반가워요.\nA 저도요.",
+    translation,
     words: null,
     vocabulary: [],
     notes: [],
@@ -38,6 +39,28 @@ async function fixture(
   await page.locator(".lesson-card").first().click();
   await expect(page.locator(".reader-content")).toBeVisible();
 }
+test("Korean appears below each English sentence even with a missing OCR speaker", async ({ page }) => {
+  await fixture(page,
+    "A The trip was incredible. No phone service, just nature.\nSo you could relax, right? It sounds like the perfect escape.\nA It really was. I feel recharged. I'd go again.",
+    "A 여행은 최고였어.휴대폰도 안 터졌어.\nB 쉴 수 있었겠다,그치?완벽한 탈출같네.\nA 정말 그랬어.재충전된 기분이야.또 가고 싶다.",
+  );
+  await page.getByRole("link", { name: "Dialogue", exact: true }).click();
+  const rows = page.locator(".dialogue-chat .scroll > div");
+  await expect(rows).toHaveCount(3);
+  await expect(rows.nth(1)).toHaveAttribute("data-speaker", "B");
+  await expect(page.locator(".dialogue-chat > .translation")).toHaveCount(0);
+  const pairs = page.locator(".bubble-sentence");
+  await expect(pairs).toHaveCount(7);
+  for (const pair of await pairs.all()) {
+    const english = pair.locator(".bubble-original");
+    const korean = pair.locator(".bubble-translation");
+    await expect(english).toHaveAttribute("lang", "en");
+    await expect(korean).toHaveAttribute("lang", "ko");
+    const a = (await english.boundingBox())!;
+    const b = (await korean.boundingBox())!;
+    expect(b.y).toBeGreaterThanOrEqual(a.y + a.height);
+  }
+});
 test("meaning paragraphs and the real vue-bubble-chat renderer show A left and B right", async ({
   page,
 }) => {

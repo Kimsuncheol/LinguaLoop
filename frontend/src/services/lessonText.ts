@@ -60,6 +60,37 @@ export function dialogueMessages(
 ) {
   const original = dialogueTurns(dialogue),
     translated = dialogueTurns(translation);
+  // OCR sometimes drops a speaker label. Recover only when sentence counts
+  // agree and every surviving English label matches a Korean turn boundary.
+  if (
+    original.turns.length > 0 &&
+    original.turns.length < translated.turns.length &&
+    !translated.intro
+  ) {
+    const english = original.turns.flatMap((turn) =>
+      dialogueSentences(turn.text, "en").map((text, i) => ({
+        text, speaker: i === 0 ? turn.speaker : null,
+      })),
+    );
+    const korean = translated.turns.flatMap((turn, turnIndex) =>
+      dialogueSentences(turn.text, "ko").map((text, i) => ({
+        text, speaker: turn.speaker, start: i === 0, turnIndex,
+      })),
+    );
+    if (
+      english.length === korean.length &&
+      english.every((sentence, i) =>
+        !sentence.speaker ||
+        (korean[i]!.start && sentence.speaker === korean[i]!.speaker),
+      )
+    ) {
+      original.turns = translated.turns.map((turn, i) => ({
+        speaker: turn.speaker,
+        text: english.filter((_, j) => korean[j]!.turnIndex === i)
+          .map((s) => s.text).join(" "),
+      }));
+    }
+  }
   const aligned =
     translated.intro === "" &&
     original.turns.length > 0 &&
@@ -69,13 +100,40 @@ export function dialogueMessages(
     );
   return {
     intro: original.intro,
-    messages: original.turns.map((turn, i) => ({
-      ...turn,
-      isMine: turn.speaker === "B",
-      translation: aligned ? translated.turns[i]!.text : null,
-    })),
+    messages: original.turns.map((turn, i) => {
+      const translation = aligned ? translated.turns[i]!.text : null;
+      const english = dialogueSentences(turn.text, "en");
+      const korean = dialogueSentences(translation, "ko");
+      return {
+        ...turn,
+        isMine: turn.speaker === "B",
+        translation,
+        // Preserve a whole translated turn when the source combines or omits
+        // sentences; never guess which sentence an unmatched meaning belongs to.
+        sentences: translation && english.length === korean.length
+          ? english.map((text, j) => ({ text, translation: korean[j]! }))
+          : [{ text: turn.text, translation }],
+      };
+    }),
     separateTranslation: aligned ? null : translation,
   };
+}
+
+export function dialogueSentences(text: string | null, language: string): string[] {
+  if (!text?.trim()) return [];
+  const normalized = text
+    .replace(/\s*\n\s*/g, " ")
+    .replace(/([.!?。！？])(?=[가-힣])/g, "$1\n");
+  const sentences: string[] = [];
+  const segmenter = new Intl.Segmenter(language, { granularity: "sentence" });
+  for (const part of segmenter.segment(normalized)) {
+    const sentence = part.segment.trim();
+    const last = sentences[sentences.length - 1];
+    if (last && /\b(?:Dr|Mr|Mrs|Ms|Prof|St|e\.g|i\.e)\.$/i.test(last)) {
+      sentences[sentences.length - 1] += " " + sentence;
+    } else if (sentence) sentences.push(sentence);
+  }
+  return sentences;
 }
 
 /** Highlight literal expression matches while keeping source text and markup safe. */

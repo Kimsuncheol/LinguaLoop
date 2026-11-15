@@ -62,14 +62,28 @@ export async function mountBubbleChat(
       badge.classList.add("character-badge");
       row.insertBefore(badge, bubble);
     }
-    const text = row.querySelector(".msg");
-    text?.setAttribute("lang", language);
-    if (message.translation && text) {
-      const meaning = document.createElement("p");
-      meaning.className = "bubble-translation";
-      meaning.lang = "ko";
-      meaning.textContent = message.translation;
-      text.insertAdjacentElement("afterend", meaning);
+    const vendorText = row.querySelector(".msg");
+    if (vendorText) {
+      const text = document.createElement("div");
+      text.className = "msg";
+      vendorText.replaceWith(text);
+      for (const sentence of message.sentences) {
+        const pair = document.createElement("div");
+        pair.className = "bubble-sentence";
+        const original = document.createElement("p");
+        original.className = "bubble-original";
+        original.lang = language;
+        original.textContent = sentence.text;
+        pair.append(original);
+        if (sentence.translation) {
+          const meaning = document.createElement("p");
+          meaning.className = "bubble-translation";
+          meaning.lang = "ko";
+          meaning.textContent = sentence.translation;
+          pair.append(meaning);
+        }
+        text.append(pair);
+      }
     }
   }
   const input = host.querySelector("textarea");

@@ -710,7 +710,9 @@ progress {
 .reader-content .dialogue-chat .character-badge { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; margin: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; }
 .reader-content .dialogue-chat .mine > .character-badge { background: var(--feature-bg); border-color: var(--feature-bg); color: var(--on-feature); }
 .reader-content .dialogue-chat .msg { display: block; white-space: pre-wrap; font-size: 18px; line-height: 1.7; }
-.reader-content .dialogue-chat .bubble-translation { margin: 12px 0 0; white-space: pre-wrap; font-size: 15px; line-height: 1.7; opacity: .88; }
+.reader-content .dialogue-chat .bubble-original { margin: 0; }
+.reader-content .dialogue-chat .bubble-sentence + .bubble-sentence { margin-top: 16px; }
+.reader-content .dialogue-chat .bubble-translation { margin: 6px 0 0; white-space: pre-wrap; font-size: 15px; line-height: 1.7; opacity: .88; }
 .dialogue-skeleton > div { width: 85%; height: 100px; margin: 16px 0; border-radius: 16px; }
 .dialogue-skeleton > div:nth-of-type(even) { margin-left: auto; }
 
