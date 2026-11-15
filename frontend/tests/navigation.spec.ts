@@ -149,7 +149,7 @@ test("expression list scroll loads both languages and pauses on pagination error
   await page.getByRole("button", { name: "Try again", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(12);
   await expect(page.locator(".load-more")).toHaveCount(0);
-  await page.getByRole("button", { name: "← All languages", exact: true }).click();
+  await page.goBack();
   await page.getByRole("button", { name: "Japanese", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(6);
   await page.locator(".load-more").scrollIntoViewIfNeeded();

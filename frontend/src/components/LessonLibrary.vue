@@ -283,7 +283,6 @@ onUnmounted(() => {
       </div>
     </div>
     <template v-else-if="view.kind === 'expressions'">
-      <button class="text-button" @click="back">← All languages</button>
       <p class="eyebrow library-eyebrow">
         YOUR DAILY DOSE / {{ languageName(language) }}
       </p>
