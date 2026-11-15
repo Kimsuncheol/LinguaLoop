@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ label?: string }>();
+withDefaults(defineProps<{ label?: string; showHeading?: boolean }>(), { showHeading: true });
 </script>
 <template>
   <div
@@ -8,8 +8,8 @@ defineProps<{ label?: string }>();
     class="skeleton-view"
   >
     <span class="sr-only">{{ label || "Loading view" }}</span>
-    <div aria-hidden="true" class="skeleton skeleton-heading"></div>
-    <div aria-hidden="true" class="skeleton skeleton-subtitle"></div>
+    <div v-if="showHeading" aria-hidden="true" class="skeleton skeleton-heading"></div>
+    <div v-if="showHeading" aria-hidden="true" class="skeleton skeleton-subtitle"></div>
     <div aria-hidden="true" class="lesson-grid">
       <div v-for="n in 3" :key="n" class="skeleton-card">
         <div class="skeleton"></div>

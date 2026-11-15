@@ -1,3 +1,3 @@
 {
-  "message": "Expression lists now start 16px below the header, with the daily dose label removed."
+  "message": "Lesson loading now shows only the rounded card skeletons, without extra placeholders above them."
 }

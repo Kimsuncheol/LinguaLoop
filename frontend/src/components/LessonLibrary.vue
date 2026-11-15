@@ -298,6 +298,7 @@ onUnmounted(() => {
         Real expressions. Useful context. Choose a lesson and make it yours.
       </p>
       <LoadingSkeleton
+        :show-heading="false"
         v-if="loading && !state.items.length"
         :label="`Loading ${languageName(language)} lessons`"
       />
@@ -325,6 +326,7 @@ onUnmounted(() => {
         </button>
       </div>
       <LoadingSkeleton
+        :show-heading="false"
         v-if="loading && state.items.length"
         label="Loading more lessons"
       />
