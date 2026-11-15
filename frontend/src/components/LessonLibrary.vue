@@ -224,6 +224,7 @@ onUnmounted(() => {
   <section
     v-if="view.kind !== 'practice'"
     class="view"
+    :class="{ 'expression-list': view.kind === 'expressions' }"
     aria-label="Lesson library"
   >
     <template v-if="view.kind === 'dashboard'">
@@ -283,9 +284,6 @@ onUnmounted(() => {
       </div>
     </div>
     <template v-else-if="view.kind === 'expressions'">
-      <p class="eyebrow library-eyebrow">
-        YOUR DAILY DOSE / {{ languageName(language) }}
-      </p>
       <div class="section-heading">
         <h1 tabindex="-1">{{ languageName(language) }} expressions</h1>
         <button

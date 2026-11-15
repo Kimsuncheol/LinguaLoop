@@ -675,7 +675,9 @@ progress {
   font-weight: 650;
 }
 .language-card-name { font-size: clamp(17px, 3vw, 24px); font-weight: 650; }
-.library-eyebrow { margin-top: 36px; }
+.view.expression-list { padding-top: 16px; }
+.expression-list .section-heading { align-items: flex-start; }
+.expression-list .section-heading h1 { margin-top: 0; }
 .reader-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; margin-top: 0; align-items: start; }
 .lesson-sidebar { background: var(--surface-soft); padding: 20px; border-radius: 20px; max-height: 75vh; overflow: auto; position: sticky; top: 24px; }
 .sidebar-lesson { display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 16px; margin-top: 10px; text-align: left; background: transparent; color: var(--text); border: 1px solid transparent; border-radius: 12px; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
