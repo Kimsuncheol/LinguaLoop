@@ -83,14 +83,18 @@ test("dashboard bottom-right button returns to top and stays out of lesson views
   await page.goto("/");
   await dashboard(page);
   const button = page.getByRole("button", { name: "Back to top", exact: true });
-  await expect(button).toBeVisible();
+  await expect(button).toHaveCount(0);
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(button).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   const bounds = (await button.boundingBox())!;
   expect(bounds.x + bounds.width).toBeGreaterThan(350);
   expect(bounds.y + bounds.height).toBeGreaterThan(800);
   await button.click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(button).toHaveCount(0);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(button).toBeVisible();
   await page.route("**/app-release.json", route => route.fulfill({ json: {
     id: "2100-01-01T00:00:00.000Z", message: "A new update is available",
   } }));
@@ -112,13 +116,17 @@ test("dashboard scroll loads both languages and pauses on pagination errors", as
   await fixture(page);
   const requests: string[] = [];
   let fail = true;
-  await page.route("**/api/lessons?**", (route) => {
+  let release = () => {};
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  await page.route("**/api/lessons?**", async (route) => {
     const url = new URL(route.request().url());
     const language = url.searchParams.get("language")!;
     const offset = Number(url.searchParams.get("offset"));
     requests.push(`${language}:${offset}`);
-    if (offset && fail)
+    if (offset && fail) {
+      await pending;
       return route.fulfill({ status: 503, json: { error: "lessons_unavailable" } });
+    }
     return route.fulfill({ json: {
       items: Array.from({ length: 6 }, (_, i) => lesson(`${language}-${offset + i}`, language)),
       nextOffset: offset ? null : 6,
@@ -128,6 +136,10 @@ test("dashboard scroll loads both languages and pauses on pagination errors", as
   await expect(page.locator(".lesson-card")).toHaveCount(6);
   expect(requests).toEqual(["en:0"]);
   await page.locator(".load-more").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("status", { name: "Loading more lessons", exact: true })).toBeVisible();
+  await expect(page.locator(".load-more")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Loading…", exact: true })).toHaveCount(0);
+  release();
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.locator(".lesson-card")).toHaveCount(6);
   expect(requests).toEqual(["en:0", "en:6"]);

@@ -350,13 +350,12 @@ onUnmounted(() => {
         </button>
       </div>
       <button
-        v-if="!error && state.next !== null && state.items.length"
+        v-if="!loading && !error && state.next !== null && state.items.length"
         ref="loadMoreTarget"
         class="secondary load-more"
-        :disabled="loading"
         @click="load"
       >
-        {{ loading ? "Loading…" : "Load more lessons" }}
+        Load more lessons
       </button>
     </template>
   </section>
