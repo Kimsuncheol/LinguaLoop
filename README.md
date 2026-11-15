@@ -184,9 +184,8 @@ are used.
 
 Meaning explanations are separated into readable paragraphs without rewriting
 source wording. Dialogue recognizes explicit A/B labels: character A is left,
-character B is right. Each matched English sentence shows its Korean translation
-directly below it. When sentence counts differ, the translation stays inside its
-matching turn. Missing OCR speaker labels are recovered only when bilingual
+character B is right. Each chat bubble shows the full English turn first, followed
+by its complete Korean translation at the bottom. Missing OCR speaker labels are recovered only when bilingual
 sentence counts and all surviving speaker boundaries agree. Unmatched translations
 remain below the conversation. Unlabelled or unsupported character formats retain the
 original text rather than inventing speakers.

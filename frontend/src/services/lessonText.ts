@@ -102,17 +102,10 @@ export function dialogueMessages(
     intro: original.intro,
     messages: original.turns.map((turn, i) => {
       const translation = aligned ? translated.turns[i]!.text : null;
-      const english = dialogueSentences(turn.text, "en");
-      const korean = dialogueSentences(translation, "ko");
       return {
         ...turn,
         isMine: turn.speaker === "B",
         translation,
-        // Preserve a whole translated turn when the source combines or omits
-        // sentences; never guess which sentence an unmatched meaning belongs to.
-        sentences: translation && english.length === korean.length
-          ? english.map((text, j) => ({ text, translation: korean[j]! }))
-          : [{ text: turn.text, translation }],
       };
     }),
     separateTranslation: aligned ? null : translation,

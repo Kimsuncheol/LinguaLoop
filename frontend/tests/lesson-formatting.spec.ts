@@ -39,7 +39,7 @@ async function fixture(
   await page.locator(".lesson-card").first().click();
   await expect(page.locator(".reader-content")).toBeVisible();
 }
-test("Korean appears below each English sentence even with a missing OCR speaker", async ({ page }) => {
+test("the complete Korean translation sits at the bottom of each bubble even with a missing OCR speaker", async ({ page }) => {
   await fixture(page,
     "A The trip was incredible. No phone service, just nature.\nSo you could relax, right? It sounds like the perfect escape.\nA It really was. I feel recharged. I'd go again.",
     "A 여행은 최고였어.휴대폰도 안 터졌어.\nB 쉴 수 있었겠다,그치?완벽한 탈출같네.\nA 정말 그랬어.재충전된 기분이야.또 가고 싶다.",
@@ -49,11 +49,14 @@ test("Korean appears below each English sentence even with a missing OCR speaker
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(1)).toHaveAttribute("data-speaker", "B");
   await expect(page.locator(".dialogue-chat > .translation")).toHaveCount(0);
-  const pairs = page.locator(".bubble-sentence");
-  await expect(pairs).toHaveCount(7);
-  for (const pair of await pairs.all()) {
-    const english = pair.locator(".bubble-original");
-    const korean = pair.locator(".bubble-translation");
+  await expect(rows.nth(2).locator(".bubble-original")).toHaveText("It really was. I feel recharged. I'd go again.");
+  await expect(rows.nth(2).locator(".bubble-translation")).toHaveText("정말 그랬어.재충전된 기분이야.또 가고 싶다.");
+  for (const row of await rows.all()) {
+    const english = row.locator(".bubble-original");
+    const korean = row.locator(".bubble-translation");
+    await expect(english).toHaveCount(1);
+    await expect(korean).toHaveCount(1);
+    await expect(row.locator(".msg > :last-child")).toHaveClass("bubble-translation");
     await expect(english).toHaveAttribute("lang", "en");
     await expect(korean).toHaveAttribute("lang", "ko");
     const a = (await english.boundingBox())!;

@@ -67,22 +67,17 @@ export async function mountBubbleChat(
       const text = document.createElement("div");
       text.className = "msg";
       vendorText.replaceWith(text);
-      for (const sentence of message.sentences) {
-        const pair = document.createElement("div");
-        pair.className = "bubble-sentence";
-        const original = document.createElement("p");
-        original.className = "bubble-original";
-        original.lang = language;
-        original.textContent = sentence.text;
-        pair.append(original);
-        if (sentence.translation) {
-          const meaning = document.createElement("p");
-          meaning.className = "bubble-translation";
-          meaning.lang = "ko";
-          meaning.textContent = sentence.translation;
-          pair.append(meaning);
-        }
-        text.append(pair);
+      const original = document.createElement("p");
+      original.className = "bubble-original";
+      original.lang = language;
+      original.textContent = message.text;
+      text.append(original);
+      if (message.translation) {
+        const meaning = document.createElement("p");
+        meaning.className = "bubble-translation";
+        meaning.lang = "ko";
+        meaning.textContent = message.translation;
+        text.append(meaning);
       }
     }
   }
