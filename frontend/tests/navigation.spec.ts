@@ -291,7 +291,7 @@ test("language changes and Home do not trap Back at the dashboard", async ({
   await page.goto("/");
   await dashboard(page);
   const length = await page.evaluate(() => history.length);
-  for (const name of ["Japanese", "English"]) {
+  for (const name of ["Japanese", "Chinese", "English"]) {
     await page.getByRole("button", { name, exact: true }).click();
     await dashboard(page);
   }

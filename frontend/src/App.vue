@@ -124,8 +124,8 @@ async function signOut() {
       <p class="eyebrow">MAKE A LITTLE ROOM FOR LANGUAGES</p>
       <h1>Keep your language<br />learning in motion.</h1>
       <p class="intro">
-        English and Japanese expressions, Korean meanings, and examples that
-        make them stick.
+        English, Japanese, and Chinese expressions, Korean meanings, and
+        examples that make them stick.
       </p>
       <a class="kakao" href="/api/auth/kakao/login"
         >Continue with KakaoTalk →</a

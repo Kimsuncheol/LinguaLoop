@@ -114,12 +114,14 @@ used as a fallback. Detail requests still use `/api/v1/articles/:id`.
 Cards from all loaded pages are also sorted by their displayed publication dates,
 with missing/invalid dates last and stable ID ordering for equal dates.
 
-## English and Japanese library
+## English, Japanese, and Chinese library
 
-The signed-in library has independent English and Japanese tabs, a desktop
+The signed-in library has independent English, Japanese, and Chinese tabs, a desktop
 reader with a lesson sidebar, and a mobile expression practice view. Japanese
 lessons preserve supplied readings, Korean meanings, examples, glossary and
-notes. Practice uses the loaded expressions; scores/progress are not persisted.
+notes; Chinese lessons preserve simplified/traditional expressions, pinyin and
+Korean pronunciation guides, Korean meanings, A/B dialogues, and vocabulary.
+Practice uses the loaded expressions; scores/progress are not persisted.
 
 Server-only configuration (trusted base origins, without API paths):
 
@@ -127,9 +129,12 @@ Server-only configuration (trusted base origins, without API paths):
 - `ENGLISH_SCRAPER_API_TOKEN`: optional Bearer token; falls back to `SCRAPER_API_TOKEN`.
 - `JAPANESE_SCRAPER_API_URL`: Japanese API origin.
 - `JAPANESE_SCRAPER_API_TOKEN`: optional, independent Bearer token.
+- `CHINESE_SCRAPER_API_URL`: Chinese API origin.
+- `CHINESE_SCRAPER_API_TOKEN`: optional, independent Bearer token.
 
-The documented hosted origins are `https://english-scrapper.onrender.com` and
-`https://japanese-scraper.onrender.com`. These are external read-only sources;
+The documented hosted origins are `https://english-scrapper.onrender.com`,
+`https://japanese-scraper.onrender.com`, and
+`https://chinese-scrapper-1011934259293.asia-northeast3.run.app`. These are external read-only sources;
 LinguaLoop does not trigger ingestion or access their separate Firebase projects.
 Render cold starts may require retrying a request. Requests have bounded timeouts.
 
@@ -137,7 +142,8 @@ Authenticated endpoints, all network-only and `Cache-Control: no-store`:
 
 - `GET /api/lessons?language=en&offset=0`: English cards, up to six per request.
 - `GET /api/lessons?language=ja&offset=0`: Japanese ready lessons, up to ten.
-- `GET /api/lessons/en/:id` and `GET /api/lessons/ja/:id`: full lesson content.
+- `GET /api/lessons?language=zh&offset=0`: Chinese lessons, up to ten.
+- `GET /api/lessons/en/:id`, `GET /api/lessons/ja/:id`, and `GET /api/lessons/zh/:id`: full lesson content.
 
 The list returns `{items, nextOffset}`. Use the returned offset, or stop when
 it is null. Language defaults to English for existing clients. Japanese offsets

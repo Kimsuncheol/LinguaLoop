@@ -44,7 +44,7 @@ function savedEntry(value: unknown): Entry | null {
   )
     return null;
   const v = e.view;
-  if (!v || !["en", "ja"].includes(v.language)) return null;
+  if (!v || !["en", "ja", "zh"].includes(v.language)) return null;
   if (v.kind === "dashboard") return e.depth === 0 ? e : null;
   if (
     !["lesson", "practice"].includes(v.kind) ||

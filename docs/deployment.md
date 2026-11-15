@@ -90,17 +90,18 @@ References: [Hosting with Cloud Run](https://firebase.google.com/docs/hosting/cl
 
 ## Shared scraper connections
 
-The bilingual lesson library uses these server-only origins:
+The lesson library uses these server-only origins:
 
 ```text
 ENGLISH_SCRAPER_API_URL=https://english-scrapper.onrender.com
 JAPANESE_SCRAPER_API_URL=https://japanese-scraper.onrender.com
+CHINESE_SCRAPER_API_URL=https://chinese-scrapper-1011934259293.asia-northeast3.run.app
 ```
 
 Keep existing runtime configuration and Secret Manager references when updating
 an existing service. Add these with `--update-env-vars`, rather than replacing
 all environment variables or secrets. Optional provider Bearer credentials use
-`ENGLISH_SCRAPER_API_TOKEN` and `JAPANESE_SCRAPER_API_TOKEN` through Secret Manager;
+`ENGLISH_SCRAPER_API_TOKEN`, `JAPANESE_SCRAPER_API_TOKEN`, and `CHINESE_SCRAPER_API_TOKEN` through Secret Manager;
 the documented public read-only APIs currently require neither. Never use
 scraper ingestion/trigger tokens for read-only requests.
 

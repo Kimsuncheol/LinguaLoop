@@ -76,7 +76,7 @@ def test_all_language_routes_require_session(monkeypatch):
     get = Mock()
     monkeypatch.setattr(lessons.requests, 'get', get)
     api = client()
-    for path in ['/api/lessons?language=ja', '/api/lessons/en/abc', '/api/lessons/ja/j1']:
+    for path in ['/api/lessons?language=ja', '/api/lessons?language=zh', '/api/lessons/en/abc', '/api/lessons/ja/j1', '/api/lessons/zh/1']:
         assert api.get(path).status_code == 401
     get.assert_not_called()
 
@@ -85,7 +85,7 @@ def test_languages_and_ids_validated_before_upstream(monkeypatch):
     get = Mock()
     monkeypatch.setattr(lessons.requests, 'get', get)
     api = japanese_client()
-    for path in ['/api/lessons?language=de', '/api/lessons/de/j1', '/api/lessons/ja/a.b', '/api/lessons?offset=100001']:
+    for path in ['/api/lessons?language=de', '/api/lessons/de/j1', '/api/lessons/ja/a.b', '/api/lessons/zh/a.b', '/api/lessons?offset=100001']:
         assert api.get(path).status_code == 400
     get.assert_not_called()
 
@@ -198,3 +198,142 @@ def test_english_content_sections_supply_missing_legacy_fields():
     value = normalize(record)
     assert value["meaning"] == "뜻"
     assert value["dialogue"] == "A Hello."
+
+
+def chinese_record(record_id=1, article_id="DGQRPKYZCFCBLEA4EF3EVPL4FQ"):
+    return {
+        "id": record_id,
+        "url": "https://www.chosun.com/national/nie/chinese/2026/11/13/DGQRPKYZCFCBLEA4EF3EVPL4FQ/",
+        "article_id": article_id,
+        "title": "[매일매일 중국어 한마디] 플러스 요인, 가산점 요소",
+        "image_url": "https://cloudfront-ap-northeast-1.images.arcpublishing.com/chosun/5DU5IBH6OJDNRCJVRLKIWW3LJE.jpg",
+        "episode_number": 5042,
+        "published_at": "2026-11-12T15:00:00Z",
+        "raw_ocr_text": "internal ocr dump",
+        "expression": {
+            "id": 10,
+            "simplified": "加分项",
+            "traditional": "加分項",
+            "pinyin": "jiāfēn xiàng",
+            "episode_number": 5042,
+            "explanation": "'加分项(jiāfēn xiàng)'은 유리한 요소를 뜻한다.",
+        },
+        "meanings": [
+            {"id": 1, "korean_meaning": "플러스 요인", "order": 0},
+            {"id": 2, "korean_meaning": "가산점 요소", "order": 1},
+        ],
+        "conversations": [
+            {
+                "id": 1,
+                "turn_order": 0,
+                "speaker": "A",
+                "chinese": "这房子带个朝南的小阳台。",
+                "pinyin": "Zhè fángzi dài ge cháo nán de xiǎo yángtái.",
+                "korean_pronunciation": "저 팡 쯔 따이 거 차오 난 더 샤오 양 타이",
+                "translation": "이 집은 남향의 작은 베란다가 딸려 있어요.",
+            },
+            {
+                "id": 2,
+                "turn_order": 1,
+                "speaker": "B",
+                "chinese": "是啊，这绝对是个加分项。",
+                "pinyin": "Shì a, zhè juéduì shì ge jiāfēn xiàng.",
+                "korean_pronunciation": "스 아 저 쥐에뚜이 스 거 지아 펀 시앙",
+                "translation": "맞아요, 이건 확실히 플러스 요인이에요.",
+            },
+        ],
+        "vocabulary": [
+            {"id": 1, "order": 0, "word": "朝南", "pinyin": "cháo nán", "meaning": "남향"},
+            {"id": 2, "order": 1, "word": "阳台", "pinyin": "yángtái", "meaning": "발코니, 베란다"},
+        ],
+    }
+
+
+def chinese_client():
+    api = create_app({
+        "TESTING": True,
+        "SECRET_KEY": "test",
+        "CHINESE_SCRAPER_API_URL": "https://chinese.example",
+        "CHINESE_SCRAPER_API_TOKEN": "chinese-token",
+        "SCRAPER_API_TOKEN": "english-token",
+    }).test_client()
+    sign_in(api)
+    return api
+
+
+def test_chinese_pagination_and_serialization(monkeypatch):
+    def get(url, **kwargs):
+        assert url == "https://chinese.example/api/articles"
+        assert kwargs["params"] == {"page": 2, "per_page": 10}
+        assert kwargs["headers"] == {"Authorization": "Bearer chinese-token"}
+        assert kwargs["timeout"] == (3, 15) and kwargs["allow_redirects"] is False
+        return Mock(
+            status_code=200,
+            json=lambda: {
+                "items": [chinese_record(i, f"CHOSUN_{i}") for i in range(10)],
+                "page": 2,
+                "per_page": 10,
+                "total": 25,
+                "pages": 3,
+            },
+        )
+    monkeypatch.setattr(lessons.requests, "get", get)
+    response = chinese_client().get("/api/lessons?language=zh&offset=12")
+    assert response.status_code == 200
+    assert len(response.json["items"]) == 8 and response.json["nextOffset"] == 20
+    item = response.json["items"][0]
+    assert item["id"] == "2" and item["language"] == "zh"
+    assert item["date"] == "2026-11-13"
+    assert item["expression"] == "加分项"
+    assert item["reading"] == "jiāfēn xiàng (加分項)"
+    assert item["meaning"] == "플러스 요인, 가산점 요소"
+    assert item["explanation"] == "'加分项(jiāfēn xiàng)'은 유리한 요소를 뜻한다."
+    assert "A: 这房子带个朝南的小阳台。" in item["dialogue"]
+    assert "(Zhè fángzi dài ge cháo nán de xiǎo yángtái.)" in item["dialogue"]
+    assert "[저 팡 쯔 따이 거 차오 난 더 샤오 양 타이]" in item["dialogue"]
+    assert item["translation"] == "A: 이 집은 남향의 작은 베란다가 딸려 있어요.\nB: 맞아요, 이건 확실히 플러스 요인이에요."
+    assert item["vocabulary"][0] == {
+        "text": "朝南",
+        "reading": "cháo nán",
+        "meaning": "남향",
+        "explanation": None,
+        "examples": [],
+    }
+    assert item["expressions"][0]["examples"][1]["meaning"] == "맞아요, 이건 확실히 플러스 요인이에요."
+    assert item["partial"] is False
+    assert item["imageUrl"].endswith("/chosun/5DU5IBH6OJDNRCJVRLKIWW3LJE.jpg")
+    assert "internal ocr dump" not in response.text
+    assert response.headers["Cache-Control"] == "no-store"
+
+
+def test_chinese_detail_numeric_and_external_id_and_errors(monkeypatch):
+    api = chinese_client()
+    calls = []
+
+    def get(url, **kwargs):
+        calls.append(url)
+        return Mock(status_code=200, json=lambda: chinese_record(42, "DGQRPKYZCFCBLEA4EF3EVPL4FQ"))
+
+    monkeypatch.setattr(lessons.requests, "get", get)
+    res_num = api.get("/api/lessons/zh/42")
+    assert res_num.status_code == 200 and res_num.json["id"] == "42"
+    assert calls[-1] == "https://chinese.example/api/articles/42"
+
+    res_ext = api.get("/api/lessons/zh/DGQRPKYZCFCBLEA4EF3EVPL4FQ")
+    assert res_ext.status_code == 200 and res_ext.json["expression"] == "加分项"
+    assert calls[-1] == "https://chinese.example/api/articles/by-article-id/DGQRPKYZCFCBLEA4EF3EVPL4FQ"
+
+    for response, expected in [
+        (Mock(status_code=404), 404),
+        (Mock(status_code=200, json=lambda: chinese_record(99, "WRONG_ID")), 503),
+        (Mock(status_code=500), 503),
+    ]:
+        monkeypatch.setattr(lessons.requests, "get", Mock(return_value=response))
+        result = api.get("/api/lessons/zh/42")
+        assert result.status_code == expected
+
+    unconfigured = create_app({"TESTING": True, "SECRET_KEY": "test", "CHINESE_SCRAPER_API_URL": ""}).test_client()
+    sign_in(unconfigured)
+    assert unconfigured.get("/api/lessons?language=zh").status_code == 503
+    assert unconfigured.get("/api/lessons/zh/42").status_code == 503
+

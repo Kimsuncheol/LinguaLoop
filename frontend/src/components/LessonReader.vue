@@ -94,7 +94,7 @@ function navigate(event: KeyboardEvent) {
     <h1 tabindex="-1" :lang="lesson.language">
       {{ lesson.expression || lesson.title || "Lesson text unavailable" }}
     </h1>
-    <p v-if="lesson.reading" class="reading" lang="ja">{{ lesson.reading }}</p>
+    <p v-if="lesson.reading" class="reading" :lang="lesson.language">{{ lesson.reading }}</p>
     <p v-if="lesson.meaning" class="meaning" lang="ko">{{ lesson.meaning }}</p>
     <nav v-if="mobile" class="tabs section-chips" aria-label="Lesson sections">
       <a

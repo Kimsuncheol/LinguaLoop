@@ -21,6 +21,7 @@ const cache = reactive<
 >({
   en: { items: [], next: 0, loaded: false },
   ja: { items: [], next: 0, loaded: false },
+  zh: { items: [], next: 0, loaded: false },
 });
 const state = computed(() => cache[language.value]);
 const loading = ref(false),
@@ -232,7 +233,7 @@ onUnmounted(() => {
       aria-label="Lesson language"
     >
       <button
-        v-for="value in ['en', 'ja'] as const"
+        v-for="value in ['en', 'ja', 'zh'] as const"
         :key="value"
         class="secondary"
         :class="{ chosen: language === value }"
@@ -316,7 +317,7 @@ onUnmounted(() => {
           <h2 :lang="language">
             {{ item.expression || item.title || "Lesson text unavailable" }}
           </h2>
-          <p v-if="item.reading" class="reading" lang="ja">
+          <p v-if="item.reading" class="reading" :lang="language">
             {{ item.reading }}
           </p>
           <p lang="ko">

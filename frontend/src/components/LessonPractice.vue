@@ -39,7 +39,7 @@ function move(delta: number) {
         <h1 tabindex="-1" :lang="current.lesson.language">
           {{ current.expression.text }}
         </h1>
-        <p v-if="current.expression.reading" lang="ja">
+        <p v-if="current.expression.reading" :lang="current.lesson.language">
           {{ current.expression.reading }}
         </p>
         <p>Can you remember what it means?</p>

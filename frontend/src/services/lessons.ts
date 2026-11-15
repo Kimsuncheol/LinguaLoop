@@ -1,4 +1,4 @@
-export type Language = "en" | "ja";
+export type Language = "en" | "ja" | "zh";
 export interface Example {
   text: string;
   reading: string | null;
@@ -64,7 +64,7 @@ export function lesson(language: Language, id: string, signal?: AbortSignal) {
   );
 }
 export const languageName = (language: Language) =>
-  language === "en" ? "English" : "Japanese";
+  language === "en" ? "English" : language === "ja" ? "Japanese" : "Chinese";
 export function lessonDate(value: string | null) {
   const date = value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime())

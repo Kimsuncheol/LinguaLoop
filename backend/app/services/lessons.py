@@ -77,7 +77,7 @@ def normalize(record):
 
 
 def fetch(language, path, params=None):
-    key = "ENGLISH" if language == "en" else "JAPANESE"
+    key = {"en": "ENGLISH", "ja": "JAPANESE", "zh": "CHINESE"}[language]
     base = current_app.config.get(key + "_SCRAPER_API_URL") or (current_app.config.get("SCRAPER_API_URL") if language == "en" else "")
     if not base:
         raise LessonsUnavailable()
@@ -96,6 +96,9 @@ def fetch(language, path, params=None):
 
 
 def detail(language, article_id):
+    if language == "zh":
+        from .chinese_lessons import detail as chinese_detail
+        return chinese_detail(article_id)
     path = "/api/v1/articles/" if language == "en" else "/api/articles/"
     record = fetch(language, path + quote(article_id, safe=""))
     if record["id"] != article_id:
@@ -109,6 +112,9 @@ def detail(language, article_id):
 
 
 def page(offset, language="en"):
+    if language == "zh":
+        from .chinese_lessons import page as chinese_page
+        return chinese_page(offset)
     if language == "ja":
         from .japanese_lessons import page as japanese_page
         return japanese_page(offset)
