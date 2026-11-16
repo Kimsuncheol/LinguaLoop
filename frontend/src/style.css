@@ -62,17 +62,25 @@ a:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 5px;
 }
-main {
-  max-width: 1180px;
-  margin: auto;
-  padding: 0 40px;
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
-.app-header {
+.app-container {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: 40px;
+}
+.app-content { flex: 1 0 auto; min-width: 0; }
+.app-header { border-bottom: 1px solid var(--border); }
+.app-header-content {
   min-height: 108px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border);
   gap: 20px;
 }
 .brand {
@@ -234,7 +242,7 @@ main {
 }
 .view {
   padding: 64px 0 56px;
-  min-height: 70vh;
+  min-height: 0;
 }
 h1 {
   font-size: clamp(2.4rem, 5vw, 4rem);
@@ -475,12 +483,15 @@ progress {
   color: var(--error-text);
 }
 .app-footer {
-  display: flex;
-  justify-content: space-between;
   border-top: 1px solid var(--border);
-  padding: 28px 0;
   color: var(--muted);
   font-size: 12px;
+}
+.app-footer-content {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 28px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
 }
 .welcome {
   position: relative;
@@ -568,10 +579,10 @@ progress {
   }
 }
 @media (max-width: 600px) {
-  main {
-    padding: 0 24px;
+  .app-container {
+    padding-inline: 24px;
   }
-  .app-header {
+  .app-header-content {
     min-height: 84px;
   }
   .brand {
@@ -640,7 +651,7 @@ progress {
   --skeleton-highlight: #36503f;
 }
 @media (max-width: 600px) {
-  .app-header { flex-wrap: wrap; padding: 18px 0; gap: 12px; }
+  .app-header-content { flex-wrap: wrap; padding-block: 18px; gap: 12px; }
 }
 
 .language-grid {

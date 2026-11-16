@@ -1,3 +1,3 @@
 {
-  "message": "Loading lesson cards now use the same spacing as the lesson cards above them."
+  "message": "The footer now ends every view, stays at the bottom on short pages, and shares full-width dividers without changing content padding."
 }
