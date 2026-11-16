@@ -224,7 +224,7 @@ onUnmounted(() => {
   <section
     v-if="view.kind !== 'practice'"
     class="view"
-    :class="{ 'expression-list': view.kind === 'expressions' }"
+    :class="{ 'expression-list': view.kind === 'expressions', 'loading-more': loading && state.items.length > 0 }"
     aria-label="Lesson library"
   >
     <template v-if="view.kind === 'dashboard'">

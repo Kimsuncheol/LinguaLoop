@@ -306,7 +306,7 @@ h2 {
 .lesson-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: var(--lesson-card-gap, 22px);
   margin: 32px 0;
 }
 .lesson-card {
@@ -675,7 +675,13 @@ progress {
   font-weight: 650;
 }
 .language-card-name { font-size: clamp(17px, 3vw, 24px); font-weight: 650; }
-.view.expression-list { padding-top: 16px; }
+.view.expression-list { padding-top: 16px; --lesson-card-gap: 22px; }
+.expression-list.loading-more > .lesson-grid { margin-bottom: 0; }
+.expression-list > .lesson-grid + .skeleton-view { padding-top: var(--lesson-card-gap); }
+.expression-list > .lesson-grid + .skeleton-view > .lesson-grid { margin-top: 0; }
+@media (max-width: 600px) {
+  .view.expression-list { --lesson-card-gap: 18px; }
+}
 .expression-list .section-heading { align-items: flex-start; }
 .expression-list .section-heading h1 { margin-top: 0; }
 .reader-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; margin-top: 0; align-items: start; }
