@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { t, locale } from "../services/appLanguage";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-type Release = { id: string; message: string };
+type Release = { id: string; message: string; messageKo?: string };
 const current = __APP_RELEASE__;
 const release = ref<Release>(current);
 const dismissed = ref("");
@@ -63,7 +64,8 @@ async function checkForRelease() {
       candidate.message.length <= 1000 &&
       Date.parse(candidate.id) > Date.parse(release.value.id)
     ) {
-      release.value = { id: candidate.id, message: candidate.message };
+      release.value = { id: candidate.id, message: candidate.message,
+        messageKo: "messageKo" in candidate && typeof candidate.messageKo === "string" && candidate.messageKo.length <= 1000 ? candidate.messageKo : undefined };
     }
   } catch {
     // Offline checks must not interrupt learning or hide existing content.
@@ -124,20 +126,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <aside v-if="visible" ref="snackbar" class="release-snackbar" aria-label="LinguaLoop update">
+  <aside v-if="visible" ref="snackbar" class="release-snackbar" :aria-label="t('LinguaLoop update')">
     <div role="status" aria-live="polite" aria-atomic="true">
-      <strong>{{ updateAvailable ? "Update recommended" : "LinguaLoop has been updated" }}</strong>
-      <p>{{ release.message }}</p>
-      <p v-if="updateAvailable">Update now to get the latest improvements. Your page will refresh.</p>
-      <p v-if="error">{{ error }}</p>
+      <strong>{{ t(updateAvailable ? "Update recommended" : "LinguaLoop has been updated") }}</strong>
+      <p>{{ locale === 'ko' ? release.messageKo || t('A new update is available.') : release.message }}</p>
+      <p v-if="updateAvailable">{{ t("Update now to get the latest improvements. Your page will refresh.") }}</p>
+      <p v-if="error">{{ t(error) }}</p>
     </div>
     <div class="release-actions">
       <button v-if="updateAvailable" class="primary" :disabled="refreshing" @click="refresh">
-        {{ refreshing ? "Updating…" : "Update now" }}
+        {{ t(refreshing ? "Updating…" : "Update now") }}
       </button>
-      <button class="text-button" :disabled="refreshing" aria-label="Dismiss update notification" @click="dismiss">
-        Dismiss
-      </button>
+      <button class="text-button" :disabled="refreshing" :aria-label="t('Dismiss update notification')" @click="dismiss">{{ t("Dismiss") }}</button>
     </div>
   </aside>
 </template>

@@ -765,3 +765,14 @@ progress {
 .dialogue-skeleton > div:nth-of-type(even) { margin-left: auto; }
 
 .meaning-copy strong { font-weight: 750; color: var(--text); }
+
+.app-language-view { max-width: 680px; }
+.language-options { border: 0; padding: 0; margin: 28px 0; display: grid; gap: 12px; }
+.language-option {
+  display: flex; align-items: center; gap: 16px; padding: 20px;
+  border: 1px solid var(--border); border-radius: 20px; background: var(--surface); cursor: pointer;
+}
+.language-option input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex-shrink: 0; }
+.language-option input:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.language-option > span { display: grid; gap: 6px; }
+.language-option .muted { margin: 0; }

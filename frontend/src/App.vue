@@ -1,16 +1,43 @@
 <script setup lang="ts">
+import { t } from "./services/appLanguage";
 import { appearance, setAppearance } from "./services/appearance";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { currentUser, logout, type User } from "./services/api";
+import AppLanguage from "./components/AppLanguage.vue";
 import LessonLibrary from "./components/LessonLibrary.vue";
 import LoadingSkeleton from "./components/LoadingSkeleton.vue";
 import ReleaseSnackbar from "./components/ReleaseSnackbar.vue";
 const library = ref<InstanceType<typeof LessonLibrary> | null>(null);
 function goHome() {
+  if (guestSettings.value) { closeGuestSettings(); return; }
   if (library.value) library.value.home();
   else window.location.replace("/");
 }
 const bento = ref<HTMLDetailsElement | null>(null);
+const guestSettings = ref(Boolean(window.history.state?.lingualoopGuestSettings));
+let guestScroll = 0;
+function closeGuestSettings() { window.history.back(); }
+function syncGuestSettings() {
+  const wasOpen = guestSettings.value;
+  guestSettings.value = Boolean(window.history.state?.lingualoopGuestSettings);
+  void nextTick(() => {
+    if (guestSettings.value) document.querySelector<HTMLElement>('.app-language-view h1')?.focus();
+    else if (wasOpen) window.scrollTo({ top: guestScroll, behavior: 'instant' });
+  });
+}
+function openAppLanguage() {
+  if (bento.value) bento.value.open = false;
+  if (library.value) library.value.openAppLanguage();
+  else if (!guestSettings.value) {
+    guestScroll = window.scrollY;
+    window.history.pushState({ ...window.history.state, lingualoopGuestSettings: true }, '');
+    syncGuestSettings();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+}
+const appearanceLabel = (value: string) => t(value === 'system' ? 'System' : value === 'light' ? 'Light' : 'Dark');
+onMounted(() => window.addEventListener('popstate', syncGuestSettings));
+onUnmounted(() => window.removeEventListener('popstate', syncGuestSettings));
 const nextAppearance = computed(() =>
   appearance.value === "system" ? "light" : appearance.value === "light" ? "dark" : "system",
 );
@@ -59,12 +86,12 @@ async function signOut() {
   <div class="app-shell">
     <header class="app-header">
       <div class="app-container app-header-content">
-        <a class="brand" href="/" aria-label="LinguaLoop home" @click.exact.prevent="goHome">
+        <a class="brand" href="/" :aria-label="t('LinguaLoop home')" @click.exact.prevent="goHome">
           <img class="brand-icon" src="/lingualoop-logo.png" alt="" width="44" height="44" />
           <span>LinguaLoop</span>
         </a>
         <details ref="bento" class="bento" @keydown.esc.stop.prevent="dismissBento">
-          <summary class="bento-toggle" aria-label="Open settings and account">
+          <summary class="bento-toggle" :aria-label="t('Open settings and account')">
             <span class="bento-dots" aria-hidden="true">
               <span v-for="dot in 9" :key="dot"></span>
             </span>
@@ -72,8 +99,8 @@ async function signOut() {
           <div class="bento-panel">
             <button
               class="menu-tile"
-              :aria-label="`Appearance: ${appearance}. Switch to ${nextAppearance}`"
-              :title="`Switch to ${nextAppearance} appearance`"
+              :aria-label="t('Appearance: {current}. Switch to {next}', { current: appearanceLabel(appearance), next: appearanceLabel(nextAppearance) })"
+              :title="t('Switch to {mode} appearance', { mode: appearanceLabel(nextAppearance) })"
               @click="setAppearance(nextAppearance)"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -87,29 +114,35 @@ async function signOut() {
                 </g>
                 <path v-else d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z" />
               </svg>
-              <span class="menu-tile-label appearance-mode" aria-live="polite">{{ appearance }}</span>
+              <span class="menu-tile-label appearance-mode" aria-live="polite">{{ appearanceLabel(appearance) }}</span>
             </button>
-            <div v-if="loading" class="menu-tile menu-tile-loading" role="status" aria-label="Loading account">
+            <button class="menu-tile" :disabled="loading" @click="openAppLanguage">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z" />
+              </svg>
+              <span class="menu-tile-label">{{ t('App language') }}</span>
+            </button>
+            <div v-if="loading" class="menu-tile menu-tile-loading" role="status" :aria-label="t('Loading account')">
               <span class="skeleton menu-icon-skeleton" aria-hidden="true"></span>
               <span class="skeleton menu-label-skeleton" aria-hidden="true"></span>
             </div>
-            <button v-else-if="user" class="menu-tile" :title="`Signed in as ${user.name}`" :disabled="signingOut" @click="signOut">
+            <button v-else-if="user" class="menu-tile" :title="t('Signed in as {name}', { name: user.name })" :disabled="signingOut" @click="signOut">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M9 4H4v16h5M13 8l4 4-4 4M8 12h13" />
               </svg>
-              <span class="menu-tile-label">{{ signingOut ? "Signing out…" : "Sign out" }}</span>
+              <span class="menu-tile-label">{{ t(signingOut ? "Signing out…" : "Sign out") }}</span>
             </button>
             <button v-else-if="error" class="menu-tile" @click="session">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
               </svg>
-              <span class="menu-tile-label">Retry account</span>
+              <span class="menu-tile-label">{{ t("Retry account") }}</span>
             </button>
-            <a v-else class="menu-tile" href="/api/auth/kakao/login" aria-label="Sign in with KakaoTalk">
+            <a v-else class="menu-tile" href="/api/auth/kakao/login" :aria-label="t('Sign in with KakaoTalk')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M15 4h5v16h-5M9 8l4 4-4 4M3 12h10" />
               </svg>
-              <span class="menu-tile-label">Sign in</span>
+              <span class="menu-tile-label">{{ t("Sign in") }}</span>
             </a>
           </div>
         </details>
@@ -117,33 +150,31 @@ async function signOut() {
     </header>
     <main class="app-container app-content">
       <ReleaseSnackbar />
-      <LoadingSkeleton v-if="loading" label="Loading your session" />
+      <AppLanguage v-if="guestSettings" @back="closeGuestSettings" />
+      <LoadingSkeleton v-else-if="loading" :label="t('Loading your session')" />
       <div v-else-if="error" role="alert" class="error">
-        <p>{{ error }}</p>
-        <button class="secondary" @click="session">Try again</button>
+        <p>{{ t(error) }}</p>
+        <button class="secondary" @click="session">{{ t("Try again") }}</button>
       </div>
       <LessonLibrary v-else-if="user" ref="library" />
       <section v-else class="welcome view">
-        <p class="eyebrow">MAKE A LITTLE ROOM FOR LANGUAGES</p>
-        <h1>Keep your language<br />learning in motion.</h1>
-        <p class="intro">
-          English, Japanese, and Chinese expressions, Korean meanings, and
-          examples that make them stick.
-        </p>
+        <p class="eyebrow">{{ t("MAKE A LITTLE ROOM FOR LANGUAGES") }}</p>
+        <h1>{{ t("Keep your language") }}<br />{{ t("learning in motion.") }}</h1>
+        <p class="intro">{{ t("English, Japanese, and Chinese expressions, Korean meanings, and examples that make them stick.") }}</p>
         <a class="kakao" href="/api/auth/kakao/login"
-          >Continue with KakaoTalk →</a
+          >{{ t("Continue with KakaoTalk →") }}</a
         >
-        <p class="muted">A little language, every day.</p>
+        <p class="muted">{{ t("A little language, every day.") }}</p>
         <div class="welcome-preview" aria-hidden="true">
-          <span class="eyebrow">READ · RECALL · REPEAT</span>
-          <h2>Your next expression<br />is waiting.</h2>
-          <span>Learn it in context. Make it your own.</span>
+          <span class="eyebrow">{{ t("READ · RECALL · REPEAT") }}</span>
+          <h2>{{ t("Your next expression") }}<br />{{ t("is waiting.") }}</h2>
+          <span>{{ t("Learn it in context. Make it your own.") }}</span>
         </div>
       </section>
     </main>
     <footer class="app-footer">
       <div class="app-container app-footer-content">
-        LinguaLoop <span>Keep learning in motion.</span>
+        LinguaLoop <span>{{ t("Keep learning in motion.") }}</span>
       </div>
     </footer>
   </div>

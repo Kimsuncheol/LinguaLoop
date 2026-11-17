@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import releaseNotes from './release-notes.json'
 
-const release = { id: new Date().toISOString(), message: releaseNotes.message }
+const release = { id: new Date().toISOString(), message: releaseNotes.message, messageKo: releaseNotes.messageKo }
 
 export default defineConfig({
   define: { __APP_RELEASE__: JSON.stringify(release) },

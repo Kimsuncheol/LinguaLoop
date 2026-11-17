@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "../services/appLanguage";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import LessonMeaning from "./LessonMeaning.vue";
 import LessonDialogue from "./LessonDialogue.vue";
@@ -90,13 +91,13 @@ function navigate(event: KeyboardEvent) {
 }
 </script>
 <template>
-  <article class="reader-content" aria-label="Lesson detail">
+  <article class="reader-content" :aria-label="t('Lesson detail')">
     <h1 tabindex="-1" :lang="lesson.language">
-      {{ lesson.expression || lesson.title || "Lesson text unavailable" }}
+      {{ lesson.expression || lesson.title || t("Lesson text unavailable") }}
     </h1>
     <p v-if="lesson.reading" class="reading" :lang="lesson.language">{{ lesson.reading }}</p>
     <p v-if="lesson.meaning" class="meaning" lang="ko">{{ lesson.meaning }}</p>
-    <nav v-if="mobile" class="tabs section-chips" aria-label="Lesson sections">
+    <nav v-if="mobile" class="tabs section-chips" :aria-label="t('Lesson sections')">
       <a
         v-for="name in tabs"
         :key="name"
@@ -104,10 +105,10 @@ function navigate(event: KeyboardEvent) {
         :class="{ active: tab === name }"
         :aria-current="tab === name ? 'location' : undefined"
         @click.prevent="scrollToSection(name)"
-        >{{ name }}</a
+        >{{ t(name) }}</a
       >
     </nav>
-    <div v-else class="tabs" role="tablist" aria-label="Lesson sections">
+    <div v-else class="tabs" role="tablist" :aria-label="t('Lesson sections')">
       <button
         v-for="name in tabs"
         :id="`tab-${name}`"
@@ -120,7 +121,7 @@ function navigate(event: KeyboardEvent) {
         @keydown="navigate"
         @click="tab = name"
       >
-        {{ name }}
+        {{ t(name) }}
       </button>
     </div>
     <section
@@ -130,11 +131,11 @@ function navigate(event: KeyboardEvent) {
       :key="section"
       class="conversation lesson-section"
       :role="mobile ? 'region' : 'tabpanel'"
-      :aria-label="mobile ? section : undefined"
+      :aria-label="mobile ? t(section) : undefined"
       :aria-labelledby="mobile ? undefined : `tab-${section}`"
       :tabindex="mobile ? -1 : 0"
     >
-      <h2 v-if="mobile" class="lesson-section-heading">{{ section }}</h2>
+      <h2 v-if="mobile" class="lesson-section-heading">{{ t(section) }}</h2>
       <template v-if="lesson.language === 'ja' && section === 'Expressions'">
         <section
           v-for="(expression, i) in lesson.expressions"
@@ -152,9 +153,7 @@ function navigate(event: KeyboardEvent) {
             :expression="expression.text"
           />
         </section>
-        <p v-if="!lesson.expressions.length">
-          Expressions are unavailable for this lesson.
-        </p>
+        <p v-if="!lesson.expressions.length">{{ t("Expressions are unavailable for this lesson.") }}</p>
       </template>
       <template v-else-if="section === 'Examples'">
         <section
@@ -174,9 +173,7 @@ function navigate(event: KeyboardEvent) {
             </p>
             <p v-if="example.meaning" lang="ko">{{ example.meaning }}</p>
           </div>
-          <p v-if="!expression.examples.length" class="muted">
-            No examples supplied for this expression.
-          </p>
+          <p v-if="!expression.examples.length" class="muted">{{ t("No examples supplied for this expression.") }}</p>
         </section>
       </template>
       <template v-else-if="section === 'Vocabulary'">
@@ -226,9 +223,7 @@ function navigate(event: KeyboardEvent) {
             !lesson.vocabulary.length &&
             !lesson.notes.length
           "
-        >
-          Vocabulary is unavailable for this lesson.
-        </p>
+        >{{ t("Vocabulary is unavailable for this lesson.") }}</p>
       </template>
       <template v-else-if="section === 'Meaning'">
         <LessonMeaning
@@ -236,9 +231,7 @@ function navigate(event: KeyboardEvent) {
           :text="lesson.explanation"
           :expression="lesson.expression"
         />
-        <p v-else>
-          This section is unavailable. Compare the original lesson below.
-        </p>
+        <p v-else>{{ t("This section is unavailable. Compare the original lesson below.") }}</p>
       </template>
       <LessonDialogue
         v-else-if="section === 'Dialogue'"
@@ -251,29 +244,27 @@ function navigate(event: KeyboardEvent) {
       v-if="lesson.expressions.length"
       class="primary reader-practice"
       @click="$emit('practice')"
-    >
-      Practice this lesson →
-    </button>
+    >{{ t("Practice this lesson →") }}</button>
     <div class="source-links">
       <a
         v-if="lesson.imageUrl"
         :href="lesson.imageUrl"
         target="_blank"
         rel="noopener noreferrer"
-        >View original lesson image ↗</a
+        >{{ t("View original lesson image ↗") }}</a
       >
       <a
         v-if="lesson.sourceUrl"
         :href="lesson.sourceUrl"
         target="_blank"
         rel="noopener noreferrer"
-        >Read the source article ↗</a
+        >{{ t("Read the source article ↗") }}</a
       >
     </div>
     <p class="muted">
-      Extracted from a lesson image{{
-        lesson.partial ? " with incomplete or uncertain text" : ""
-      }}. If something looks off, compare the original.
+      {{ t(lesson.partial
+        ? "Extracted from a lesson image with incomplete or uncertain text. If something looks off, compare the original."
+        : "Extracted from a lesson image. If something looks off, compare the original.") }}
     </p>
   </article>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "../services/appLanguage";
 import { nextTick, onMounted, ref, watch } from "vue";
 const props = defineProps<{ open: boolean; ready: boolean }>();
 const emit = defineEmits<{ stay: []; leave: [] }>();
@@ -22,20 +23,16 @@ onMounted(sync);
     aria-describedby="exit-description"
     @cancel.prevent="emit('stay')"
   >
-    <h2 id="exit-title">Leave LinguaLoop?</h2>
-    <p id="exit-description">Are you sure you want to leave the app?</p>
+    <h2 id="exit-title">{{ t("Leave LinguaLoop?") }}</h2>
+    <p id="exit-description">{{ t("Are you sure you want to leave the app?") }}</p>
     <div class="exit-dialog-actions">
       <button
         ref="stayButton"
         class="secondary"
         autofocus
         @click="emit('stay')"
-      >
-        Stay
-      </button>
-      <button class="primary" :disabled="!ready" @click="emit('leave')">
-        Leave
-      </button>
+      >{{ t("Stay") }}</button>
+      <button class="primary" :disabled="!ready" @click="emit('leave')">{{ t("Leave") }}</button>
     </div>
   </dialog>
 </template>

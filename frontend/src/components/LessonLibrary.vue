@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "../services/appLanguage";
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import {
   lessons,
@@ -10,6 +11,7 @@ import {
   newestLessonFirst,
 } from "../services/lessons";
 import { useLibraryNavigation, type LibraryView } from "../services/navigation";
+import AppLanguage from "./AppLanguage.vue";
 import ExitConfirmation from "./ExitConfirmation.vue";
 import LoadingSkeleton from "./LoadingSkeleton.vue";
 import LessonReader from "./LessonReader.vue";
@@ -98,7 +100,7 @@ async function restoreView(target: LibraryView) {
   selected.value = null;
   practice.value = null;
   language.value = target.language;
-  if (target.kind === "dashboard") return;
+  if (target.kind === "dashboard" || target.kind === "app-language") return;
   if (target.kind === "expressions") {
     if (!state.value.loaded) await load();
     return;
@@ -182,7 +184,8 @@ watch(
   },
   { flush: "post" },
 );
-defineExpose({ home });
+function openAppLanguage() { navigate({ kind: "app-language", language: language.value }); }
+defineExpose({ home, openAppLanguage });
 onUnmounted(() => {
   loadMoreObserver?.disconnect();
   listController?.abort();
@@ -190,6 +193,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
+  <AppLanguage v-if="view.kind === 'app-language'" @back="back" />
   <BackToTop v-if="view.kind === 'expressions'" />
   <ExitConfirmation
     :open="exitRequested"
@@ -197,9 +201,7 @@ onUnmounted(() => {
     @stay="stay"
     @leave="leave"
   />
-  <p v-if="exitHint" class="hint" role="status">
-    Press Back once more to leave the app.
-  </p>
+  <p v-if="exitHint" class="hint" role="status">{{ t("Press Back once more to leave the app.") }}</p>
   <KeepAlive :max="10">
     <LessonPractice
       v-if="view.kind === 'practice' && practice"
@@ -210,28 +212,28 @@ onUnmounted(() => {
     />
   </KeepAlive>
   <section v-if="view.kind === 'practice' && !practice" class="practice view">
-    <button class="text-button" @click="back">← Back</button>
-    <div v-if="practiceLoading" role="status" aria-label="Loading practice">
-      <span class="sr-only">Loading practice</span>
+    <button class="text-button" @click="back">{{ t("← Back") }}</button>
+    <div v-if="practiceLoading" role="status" :aria-label="t('Loading practice')">
+      <span class="sr-only">{{ t("Loading practice") }}</span>
       <div class="skeleton skeleton-heading" aria-hidden="true"></div>
       <div class="skeleton reader-skeleton-body" aria-hidden="true"></div>
     </div>
     <div v-else-if="practiceError" class="error" role="alert">
-      <p>{{ practiceError }}</p>
-      <button class="secondary" @click="retry">Try again</button>
+      <p>{{ t(practiceError) }}</p>
+      <button class="secondary" @click="retry">{{ t("Try again") }}</button>
     </div>
   </section>
   <section
-    v-if="view.kind !== 'practice'"
+    v-if="view.kind !== 'practice' && view.kind !== 'app-language'"
     class="view"
     :class="{ 'expression-list': view.kind === 'expressions', 'loading-more': loading && state.items.length > 0 }"
-    aria-label="Lesson library"
+    :aria-label="t('Lesson library')"
   >
     <template v-if="view.kind === 'dashboard'">
-      <p class="eyebrow">YOUR DAILY DOSE</p>
-      <h1 tabindex="-1">A little language,<br />every day.</h1>
-      <p class="muted">Choose a language to explore its expressions.</p>
-      <nav class="language-grid" aria-label="Expression lists by language">
+      <p class="eyebrow">{{ t("YOUR DAILY DOSE") }}</p>
+      <h1 tabindex="-1">{{ t("A little language,") }}<br />{{ t("every day.") }}</h1>
+      <p class="muted">{{ t("Choose a language to explore its expressions.") }}</p>
+      <nav class="language-grid" :aria-label="t('Expression lists by language')">
         <button
           v-for="value in ['en', 'ja', 'zh'] as const"
           :key="value"
@@ -245,8 +247,8 @@ onUnmounted(() => {
       </nav>
     </template>
     <div v-if="view.kind === 'lesson'" class="reader-workspace">
-      <aside class="lesson-sidebar" aria-label="Lessons on this page">
-        <p class="eyebrow">{{ languageName(language) }} LESSONS</p>
+      <aside class="lesson-sidebar" :aria-label="t('Lessons on this page')">
+        <p class="eyebrow">{{ t('{language} lessons', { language: languageName(language) }) }}</p>
         <button
           v-for="item in state.items"
           :key="item.id"
@@ -255,7 +257,7 @@ onUnmounted(() => {
           @click="open(item)"
         >
           <strong :lang="language">{{
-            item.expression || item.title || "Lesson"
+            item.expression || item.title || t("Lesson")
           }}</strong><span>{{ lessonDate(item.date) }}</span>
         </button>
       </aside>
@@ -264,17 +266,17 @@ onUnmounted(() => {
           v-if="detailLoading"
           class="detail-skeleton"
           role="status"
-          aria-label="Loading lesson detail"
+          :aria-label="t('Loading lesson detail')"
         >
-          <span class="sr-only">Loading lesson detail</span>
+          <span class="sr-only">{{ t("Loading lesson detail") }}</span>
           <div class="skeleton skeleton-heading" aria-hidden="true"></div>
           <div class="skeleton skeleton-subtitle" aria-hidden="true"></div>
           <div class="skeleton reader-skeleton-body" aria-hidden="true"></div>
         </div>
         <div v-else-if="detailError" class="error" role="alert">
-          <button class="text-button" @click="back">{{ backLabel }}</button>
-          <p>{{ detailError }}</p>
-          <button class="secondary" @click="retry">Try again</button>
+          <button class="text-button" @click="back">{{ t(backLabel) }}</button>
+          <p>{{ t(detailError) }}</p>
+          <button class="secondary" @click="retry">{{ t("Try again") }}</button>
         </div>
         <LessonReader
           v-else-if="selected"
@@ -285,22 +287,18 @@ onUnmounted(() => {
     </div>
     <template v-else-if="view.kind === 'expressions'">
       <div class="section-heading">
-        <h1 tabindex="-1">{{ languageName(language) }} expressions</h1>
+        <h1 tabindex="-1">{{ t('{language} expressions', { language: languageName(language) }) }}</h1>
         <button
           v-if="canPractice"
           class="secondary"
           @click="startPractice(state.items)"
-        >
-          Practice these expressions ↗
-        </button>
+        >{{ t("Practice these expressions ↗") }}</button>
       </div>
-      <p class="muted">
-        Real expressions. Useful context. Choose a lesson and make it yours.
-      </p>
+      <p class="muted">{{ t("Real expressions. Useful context. Choose a lesson and make it yours.") }}</p>
       <LoadingSkeleton
         :show-heading="false"
         v-if="loading && !state.items.length"
-        :label="`Loading ${languageName(language)} lessons`"
+        :label="t('Loading {language} lessons', { language: languageName(language) })"
       />
       <div v-if="state.items.length" class="lesson-grid">
         <button
@@ -314,50 +312,46 @@ onUnmounted(() => {
             >{{ languageName(language) }} · {{ lessonDate(item.date) }}</span
           >
           <h2 :lang="language">
-            {{ item.expression || item.title || "Lesson text unavailable" }}
+            {{ item.expression || item.title || t("Lesson text unavailable") }}
           </h2>
           <p v-if="item.reading" class="reading" :lang="language">
             {{ item.reading }}
           </p>
           <p lang="ko">
-            {{ item.meaning || "Open the lesson to view available context." }}
+            {{ item.meaning || t("Open the lesson to view available context.") }}
           </p>
-          <span class="card-action">Open lesson →</span>
+          <span class="card-action">{{ t("Open lesson →") }}</span>
         </button>
       </div>
       <LoadingSkeleton
         :show-heading="false"
         v-if="loading && state.items.length"
-        label="Loading more lessons"
+        :label="t('Loading more lessons')"
       />
       <div v-if="error" role="alert" class="error">
-        <p>{{ error }}</p>
-        <button class="secondary" @click="load">Try again</button>
+        <p>{{ t(error) }}</p>
+        <button class="secondary" @click="load">{{ t("Try again") }}</button>
       </div>
       <div
         v-else-if="state.loaded && !state.items.length && !loading"
         class="empty"
       >
-        <h2>Your first expression is on its way.</h2>
-        <p>No {{ languageName(language) }} lessons are available yet.</p>
+        <h2>{{ t("Your first expression is on its way.") }}</h2>
+        <p>{{ t('No {language} lessons are available yet.', { language: languageName(language) }) }}</p>
         <button
           class="secondary"
           @click="
             state.next = 0;
             load();
           "
-        >
-          Refresh lessons
-        </button>
+        >{{ t("Refresh lessons") }}</button>
       </div>
       <button
         v-if="!loading && !error && state.next !== null && state.items.length"
         ref="loadMoreTarget"
         class="secondary load-more"
         @click="load"
-      >
-        Load more lessons
-      </button>
+      >{{ t("Load more lessons") }}</button>
     </template>
   </section>
 </template>

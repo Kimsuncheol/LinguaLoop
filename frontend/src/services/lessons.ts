@@ -1,3 +1,4 @@
+import { t, locale } from "./appLanguage";
 export type Language = "en" | "ja" | "zh";
 export interface Example {
   text: string;
@@ -36,7 +37,7 @@ async function read<T>(path: string, signal?: AbortSignal): Promise<T> {
     signal: signal
       ? AbortSignal.any([signal, AbortSignal.timeout(35000)])
       : AbortSignal.timeout(35000),
-  });
+  }).catch(() => { throw new Error("Lessons are unavailable right now. Please try again."); });
   if (!response.ok)
     throw new Error(
       response.status === 401
@@ -64,17 +65,17 @@ export function lesson(language: Language, id: string, signal?: AbortSignal) {
   );
 }
 export const languageName = (language: Language) =>
-  language === "en" ? "English" : language === "ja" ? "Japanese" : "Chinese";
+  t(language === "en" ? "English" : language === "ja" ? "Japanese" : "Chinese");
 export function lessonDate(value: string | null) {
   const date = value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime())
-    ? date.toLocaleDateString("en-US", {
+    ? date.toLocaleDateString(locale.value === "ko" ? "ko-KR" : "en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
         timeZone: "Asia/Seoul",
       })
-    : "Date unavailable";
+    : t("Date unavailable");
 }
 
 /** Keep publication dates descending across every loaded page; unknown dates last. */

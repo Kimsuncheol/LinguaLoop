@@ -7,4 +7,12 @@ try {
 } catch {
   document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+// Set the UI language before the app renders.
+try {
+  const saved = localStorage.getItem('lingualoop-app-language');
+  const preferred = (navigator.languages || [navigator.language]).find(value => /^(en|ko)(-|$)/i.test(value)) || 'en';
+  document.documentElement.lang = saved === 'en' || saved === 'ko' ? saved : /^ko(-|$)/i.test(preferred) ? 'ko' : 'en';
+} catch {
+  document.documentElement.lang = /^ko(-|$)/i.test(navigator.language) ? 'ko' : 'en';
+}
 </script></head><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>

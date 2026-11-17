@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "../services/appLanguage";
 import { computed, ref } from "vue";
 import { type Lesson, languageName } from "../services/lessons";
 const props = defineProps<{ lessons: Lesson[] }>();
@@ -20,29 +21,29 @@ function move(delta: number) {
 }
 </script>
 <template>
-  <section class="practice view" aria-label="Recall practice">
-    <button class="text-button" @click="$emit('back')">← Back</button>
+  <section class="practice view" :aria-label="t('Recall practice')">
+    <button class="text-button" @click="$emit('back')">{{ t("← Back") }}</button>
     <template v-if="current">
       <div class="section-heading">
         <p class="eyebrow">
-          {{ languageName(current.lesson.language) }} / PRACTICE
+          {{ t('{language} / PRACTICE', { language: languageName(current.lesson.language) }) }}
         </p>
         <span aria-live="polite">{{ index + 1 }} / {{ entries.length }}</span>
       </div>
       <progress
         :value="index + 1"
         :max="entries.length"
-        aria-label="Practice position"
+        :aria-label="t('Practice position')"
       ></progress>
       <div class="focus-card">
-        <p class="eyebrow">ONE EXPRESSION</p>
+        <p class="eyebrow">{{ t("ONE EXPRESSION") }}</p>
         <h1 tabindex="-1" :lang="current.lesson.language">
           {{ current.expression.text }}
         </h1>
         <p v-if="current.expression.reading" :lang="current.lesson.language">
           {{ current.expression.reading }}
         </p>
-        <p>Can you remember what it means?</p>
+        <p>{{ t("Can you remember what it means?") }}</p>
       </div>
       <button
         class="primary full"
@@ -50,35 +51,27 @@ function move(delta: number) {
         aria-controls="practice-meaning"
         @click="revealed = !revealed"
       >
-        {{ revealed ? "Hide meaning" : "Reveal meaning" }}
+        {{ t(revealed ? "Hide meaning" : "Reveal meaning") }}
       </button>
       <div id="practice-meaning" aria-live="polite">
         <p v-if="revealed" class="meaning reveal" lang="ko">
           {{
             current.expression.meaning ||
-            "Translation unavailable. Check the original lesson."
+            t("Translation unavailable. Check the original lesson.")
           }}
         </p>
       </div>
-      <p class="hint">
-        Say it out loud, then open the lesson to see its context. Progress is
-        not saved.
-      </p>
-      <button class="text-button" @click="$emit('open', current.lesson)">
-        Open full lesson ↗
-      </button>
+      <p class="hint">{{ t("Say it out loud, then open the lesson to see its context. Progress is not saved.") }}</p>
+      <button class="text-button" @click="$emit('open', current.lesson)">{{ t("Open full lesson ↗") }}</button>
       <div class="section-heading">
-        <button class="text-button" :disabled="index === 0" @click="move(-1)">
-          ← Previous</button
+        <button class="text-button" :disabled="index === 0" @click="move(-1)">{{ t("← Previous") }}</button
         ><button
           class="text-button"
           :disabled="index === entries.length - 1"
           @click="move(1)"
-        >
-          Next expression →
-        </button>
+        >{{ t("Next expression →") }}</button>
       </div>
     </template>
-    <p v-else class="empty">No expressions are available to practice.</p>
+    <p v-else class="empty">{{ t("No expressions are available to practice.") }}</p>
   </section>
 </template>

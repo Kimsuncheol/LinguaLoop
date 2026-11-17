@@ -1,3 +1,4 @@
+import { t } from "./appLanguage";
 import type { ComponentOptions } from "vue";
 import type { dialogueMessages } from "./lessonText";
 type Messages = ReturnType<typeof dialogueMessages>["messages"];
@@ -49,7 +50,7 @@ export async function mountBubbleChat(
     throw new Error("Chat renderer unavailable");
   }
   list.setAttribute("role", "list");
-  list?.setAttribute("aria-label", "Dialogue between characters A and B");
+  list?.setAttribute("aria-label", t("Dialogue between characters A and B"));
   for (const [i, row] of Array.from(list?.children || []).entries()) {
     const message = messages[i];
     if (!message) continue;

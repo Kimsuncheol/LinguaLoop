@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t, locale } from "../services/appLanguage";
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { dialogueMessages } from "../services/lessonText";
 import { mountBubbleChat } from "../services/bubbleChat";
@@ -53,7 +54,7 @@ onMounted(() => {
   active = true;
   void render();
 });
-watch(() => [props.dialogue, props.translation, props.language], render);
+watch(() => [props.dialogue, props.translation, props.language, locale.value], render);
 onUnmounted(() => {
   active = false;
   revision++;
@@ -73,9 +74,9 @@ onUnmounted(() => {
       v-if="loading"
       class="dialogue-skeleton"
       role="status"
-      aria-label="Loading dialogue bubbles"
+      :aria-label="t('Loading dialogue bubbles')"
     >
-      <span class="sr-only">Loading dialogue bubbles</span>
+      <span class="sr-only">{{ t("Loading dialogue bubbles") }}</span>
       <div v-for="n in 3" :key="n" class="skeleton" aria-hidden="true"></div>
     </div>
     <div
@@ -88,14 +89,14 @@ onUnmounted(() => {
       class="lesson-copy"
       :lang="language"
     >
-      {{ dialogue || "Dialogue is unavailable for this lesson." }}
+      {{ dialogue || t("Dialogue is unavailable for this lesson.") }}
     </p>
     <div
       v-if="translation && (content.separateTranslation || failed)"
       class="translation"
       lang="ko"
     >
-      <p class="eyebrow">KOREAN TRANSLATION</p>
+      <p class="eyebrow">{{ t("KOREAN TRANSLATION") }}</p>
       <p class="lesson-copy">{{ translation }}</p>
     </div>
   </div>

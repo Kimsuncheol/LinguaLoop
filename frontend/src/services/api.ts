@@ -6,7 +6,7 @@ export async function currentUser(): Promise<User | null> {
   const response = await fetch("/api/auth/me", {
     credentials: "same-origin",
     signal: AbortSignal.timeout(10000),
-  });
+  }).catch(() => { throw new Error("Unable to load your session. Please try again."); });
   if (response.status === 401) return null;
   if (!response.ok)
     throw new Error("Unable to load your session. Please try again.");
@@ -17,6 +17,6 @@ export async function logout(): Promise<void> {
     signal: AbortSignal.timeout(10000),
     method: "POST",
     headers: { "X-Requested-With": "LinguaLoop" },
-  });
+  }).catch(() => { throw new Error("Unable to sign out. Please try again."); });
   if (!response.ok) throw new Error("Unable to sign out. Please try again.");
 }

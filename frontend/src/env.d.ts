@@ -1,1 +1,1 @@
-declare const __APP_RELEASE__: { id: string; message: string };
+declare const __APP_RELEASE__: { id: string; message: string; messageKo?: string };

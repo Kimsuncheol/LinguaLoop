@@ -203,3 +203,15 @@ No chat messages are sent or stored.
 Checks: `npm run test:lesson-text` covers paragraph/character parsing and
 `npm run test:lesson-ui` covers the actual package renderer, alignment, themes,
 translation grouping, safe text rendering and cleanup. All API data is mocked.
+
+## App language
+
+The bento menu opens App language for signed-in and signed-out users. Options
+are System (default), English, and Korean. The browser stores the selection in
+`lingualoop-app-language`. System follows the first supported language in the
+browser preference list and falls back to English; live system-language and
+cross-tab changes update the interface. The page language is applied before
+rendering. UI labels, errors, dates, practice controls and release notices are
+localized. Course selection, original expressions, readings and supplied Korean
+meanings remain unchanged. Language settings participate in Back/Forward
+navigation, and the shared footer remains at the end of the view.
